@@ -159,13 +159,8 @@
     </a>
     <ul class="nav section-nav flex-column">
      <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#manual-way">
-       Manual way
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#using-a-db-and-an-ethereum-node">
-       Using a DB and an ethereum node
+      <a class="reference internal nav-link" href="#using-a-database-and-an-ethereum-node">
+       Using a database and an ethereum node
       </a>
      </li>
     </ul>
@@ -258,26 +253,22 @@
 </div>
 <div class="section" id="take-snapshots">
 <h2>1. Take Snapshots<a class="headerlink" href="#take-snapshots" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="manual-way">
-<h3>Manual way<a class="headerlink" href="#manual-way" title="Permalink to this headline">¶</a></h3>
-<p>Due to the fact that AGIX has less than 100,000 holders, we can manually download a .csv file with the balances of all holders <a class="reference external" href="https://etherscan.io/exportData?type=tokenholders&amp;contract=0x5b7533812759b45c2b44c19e320ba2cd2681b542&amp;decimal=8">using Etherscan</a>.</p>
-</div>
-<div class="section" id="using-a-db-and-an-ethereum-node">
-<h3>Using a DB and an ethereum node<a class="headerlink" href="#using-a-db-and-an-ethereum-node" title="Permalink to this headline">¶</a></h3>
-<p>This is doable due to the small number of holders, but it may be reasonable to store a list of transactions/balances in a dedicated DB if the number of holders starts to become large enough. Which I think it’s what’s currently implemented in the existing airdrop.</p>
-<p>The balances in the database could be bootstrapped by an initial import from Etherscan and be kept up to date by running a node that listens for new transactions.</p>
+<div class="section" id="using-a-database-and-an-ethereum-node">
+<h3>Using a database and an ethereum node<a class="headerlink" href="#using-a-database-and-an-ethereum-node" title="Permalink to this headline">¶</a></h3>
+<p>A relational DB can be used to store a list of balances. I think it’s what could be currently implemented in the existing airdrop.</p>
+<p>The balances in the database could be bootstrapped by an initial import from Etherscan or by the initial snapshot, and be kept up to date by running a node that listens for new transactions.</p>
 </div>
 </div>
 <div class="section" id="calculate-eligibility">
 <h2>2. Calculate Eligibility<a class="headerlink" href="#calculate-eligibility" title="Permalink to this headline">¶</a></h2>
-<p>The following criteria follows the airdrop mechanics as described in the (official post](of the snapshot on the 17th of April 2021, at 23:59 UTC+0.)</p>
+<p>The following criteria follows the airdrop mechanics as described in the <a class="reference external" href="https://medium.com/singularitydao/singularitydao-updated-airdrop-eb6fc9d2210b">official post</a></p>
 <p>The airdrop mechanics encompass 3 different groups:</p>
 <ul class="simple">
 <li><p>Stakers</p></li>
 <li><p>Holders</p></li>
 <li><p>Liquidity Providers</p></li>
 </ul>
-<p>The balances and eligibility of each category are calculated separately.</p>
+<p>The eligibility and distribution of each category are calculated separately.</p>
 <div class="section" id="stakers">
 <h3>Stakers<a class="headerlink" href="#stakers" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="eligibility">
