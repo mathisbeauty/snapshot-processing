@@ -149,13 +149,8 @@
   </a>
   <ul class="visible nav section-nav flex-column">
    <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#scalability">
-     Scalability
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#steps">
-     Steps
+    <a class="reference internal nav-link" href="#overview">
+     Overview
     </a>
    </li>
    <li class="toc-h2 nav-item toc-entry">
@@ -253,15 +248,8 @@
                 
   <div class="section" id="singularitydao-automating-the-airdrop-calculations">
 <h1>SingularityDAO: Automating the airdrop calculations<a class="headerlink" href="#singularitydao-automating-the-airdrop-calculations" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="scalability">
-<h2>Scalability<a class="headerlink" href="#scalability" title="Permalink to this headline">¶</a></h2>
-<p>The main purpose of this notebook it’s to explore how to automate the data processing of the snapshots.</p>
-<p>That’s the reason why we are only dealing with a subset of the holders.</p>
-<p>Once the process works reliably and can be performed automatically, the next step would be to containerize it for cloud processing.</p>
-<p>In principle, the processing could be distributed by grouping all the addresses to process in batches of N addresses, and each container would calculate the eligibility for one batch at a time. Once the batch it’s processed, the container would either request another one, or be destroyed if there aren’t more.</p>
-</div>
-<div class="section" id="steps">
-<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <ol class="simple">
 <li><p><strong>Take Snapshots</strong> Generate snapshots placed at random intervals (and optionally store results in a DB)</p></li>
 <li><p><strong>Calculate Eligibility</strong>  Categorize each address and apply custom logic depending on the airdrop’s eligibility criteria</p></li>
