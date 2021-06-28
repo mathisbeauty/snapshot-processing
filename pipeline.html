@@ -1,0 +1,1887 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SingularityDAO snapshot processing pipeline &#8212; My Jupyter Book</title>
+    
+  <link href="_static/css/theme.css" rel="stylesheet" />
+  <link href="_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinx-book-theme.acff12b8f9c144ce68a297486a2fa670.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-2 bd-sidebar site-navigation show single-page" id="site-navigation">
+    
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            
+            
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/pipeline.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/executablebooks/jupyter-book/master?urlpath=tree/pipeline.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        
+    </div>
+</div>
+
+        </div>
+
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show">
+            
+            <div class="tocsection onthispage pt-5 pb-3">
+                <i class="fas fa-list"></i> Contents
+            </div>
+            <nav id="bd-toc-nav">
+                <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#notes">
+   Notes
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#manually-getting-the-data">
+     Manually getting the data
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#scalability">
+     Scalability
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#take-snapshots">
+   1. Take snapshots
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#calculate-eligibility">
+   2. Calculate eligibility
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#initial-snapshot">
+     Initial snapshot
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#iterate-through-the-snapshots">
+     Iterate through the snapshots
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#calculating-airdrop-amount">
+     Calculating airdrop amount
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#parameters">
+       Parameters
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#merge-address-lists">
+       Merge address lists
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#stakers">
+       Stakers
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#add-the-calculated-rewards-to-final-data-frame">
+         Add the calculated rewards to final data frame
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#holders-and-lp">
+       Holders and LP
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#verify-rewards">
+         Verify rewards
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#id1">
+         Add the calculated rewards to final data frame
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#adding-unclaimed-balances">
+     Adding unclaimed balances
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="singularitydao-snapshot-processing-pipeline">
+<h1>SingularityDAO snapshot processing pipeline<a class="headerlink" href="#singularitydao-snapshot-processing-pipeline" title="Permalink to this headline">¶</a></h1>
+<p>This notebook it’s meant to explore how the snapshots could be processed automatically.</p>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="manually-getting-the-data">
+<h3>Manually getting the data<a class="headerlink" href="#manually-getting-the-data" title="Permalink to this headline">¶</a></h3>
+<p>Due to the fact that AGIX has less than 100,000 holders, we can manually download a .csv file with the balances of all holders <a class="reference external" href="https://etherscan.io/exportData?type=tokenholders&amp;contract=0x5b7533812759b45c2b44c19e320ba2cd2681b542&amp;decimal=8">using Etherscan</a>.</p>
+<p>This is doable due to the small number of holders, but not really practical for automating the production pipeline. As this is just an example, it will work for our purposes here.</p>
+</div>
+<div class="section" id="scalability">
+<h3>Scalability<a class="headerlink" href="#scalability" title="Permalink to this headline">¶</a></h3>
+<p>The main purpose of this notebook it’s to explore how to automate the data processing of the snapshots.</p>
+<p>That’s the reason why we are only dealing with a subset of the snapshots.</p>
+<p>Once the process works reliably and can be performed automatically, the next step would be to containerize it for cloud processing.</p>
+<p>In principle, the processing could be distributed by grouping all the addresses to process in batches of N addresses, and each container would calculate the eligibility for one batch at a time. Once the batch it’s processed, the container would either request another one, or be destroyed if there aren’t more.</p>
+<p>This shouldn’t be necessary if the amount of the data it’s relatively small and the calculations can be done in a single machine quickly.</p>
+</div>
+</div>
+<div class="section" id="take-snapshots">
+<h2>1. Take snapshots<a class="headerlink" href="#take-snapshots" title="Permalink to this headline">¶</a></h2>
+<p>For the example pipeline, I’m going to use just a small number of snapshots taken manually, due to the fact that the main focus of this notebook is to create the processing pipeline, not to gather the snapshots.</p>
+<p>The first step is to import all the libraries that we’re going to use for the data processing and for gathering insights about the dataset with statistical analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import libraries</span>
+<span class="c1"># Pandas for tabular data</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">walk</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="c1"># from tqdm.auto import tqdm  # for notebooks</span>
+
+<span class="n">tqdm</span><span class="o">.</span><span class="n">pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Next step is reading the <code class="docutils literal notranslate"><span class="pre">data</span></code> directory to see how many snapshots we have for each token respectively (AGI and AGIX)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_snapshots</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">walk</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[]))[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="n">agi_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/holders/agi&#39;</span><span class="p">)</span>
+<span class="n">agix_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/holders/agix&#39;</span><span class="p">)</span>
+
+<span class="n">pprint</span><span class="p">(</span><span class="n">agi_snapshots_files</span><span class="p">)</span>
+<span class="n">pprint</span><span class="p">(</span><span class="n">agix_snapshots_files</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;12700788-export-tokenholders-for-contract-0x8eb24319393716668d768dcec29356ae9cffe285.csv&#39;]
+[&#39;12700800-export-tokenholders-for-contract-0x5b7533812759b45c2b44c19e320ba2cd2681b542.csv&#39;,
+ &#39;12709185-export-tokenholders-for-contract-0x5b7533812759b45c2b44c19e320ba2cd2681b542.csv&#39;,
+ &#39;12709949-export-tokenholders-for-contract-0x5b7533812759b45c2b44c19e320ba2cd2681b542.csv&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Load snapshots for liquidity providers and stakers.</p>
+<p>In this example, the snapshots are the same as the AGIX holders, to focus on developing the calculations first, leaving getting the data from the database for later on.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lp_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/lp&#39;</span><span class="p">)</span>
+
+<span class="n">stakers_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/stakers&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Read the snapshots’ contents using <code class="docutils literal notranslate"><span class="pre">pandas</span></code> and convert balances to unsinged long numbers (SDAO wei)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Decimals AGI/AGIX</span>
+
+<span class="n">DECIMALS_AGI</span> <span class="o">=</span> <span class="mi">8</span>
+
+<span class="n">CONVERT_TO_FULL_BALANCE_AGI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">DECIMALS_AGI</span><span class="p">)</span>
+
+<span class="n">AGI_THRESHOLD</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span>
+
+<span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+    <span class="c1"># Read csv file</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;../data/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+    <span class="c1"># Sort accounts by holding amount, larger holders at the top</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;Balance&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">})</span>
+    <span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;Balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;Balance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span><span class="p">)</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;Balance&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data_frame</span>
+
+<span class="n">agi_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;holders&quot;</span><span class="p">,</span> <span class="s2">&quot;agi/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">agi_snapshots_files</span><span class="p">]</span>
+<span class="n">agix_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;holders&quot;</span><span class="p">,</span> <span class="s2">&quot;agix/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">agix_snapshots_files</span><span class="p">]</span>
+
+<span class="n">lp_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;lp&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">lp_snapshots_files</span><span class="p">]</span>
+<span class="n">stakers_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;stakers&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">stakers_snapshots_files</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The snapshots are now loaded as a panda DataFrame.</p>
+<p>Let’s see the structure of a single snapshot and a single row, to get a better idea of the dataset.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">agi_snapshots_raw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">agi_snapshots_raw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;HolderAddress&#39;, &#39;Balance&#39;, &#39;PendingBalanceUpdate&#39;], dtype=&#39;object&#39;)
+HolderAddress           0xbe0eb53f46cd790cd13851d5eff43d12404d33e8
+Balance                                        14182336000000000.0
+PendingBalanceUpdate                                            No
+Name: 7738, dtype: object
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s remove the <code class="docutils literal notranslate"><span class="pre">PendingBalanceUpdate</span></code> column and rename the other two, to clean the dataset and make it more practical.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">):</span>
+    <span class="n">cleaned_snapshot</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;PendingBalanceUpdate&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">)</span>
+    <span class="n">cleaned_snapshot</span> <span class="o">=</span> <span class="n">cleaned_snapshot</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;HolderAddress&quot;</span><span class="p">:</span> <span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="s2">&quot;Balance&quot;</span><span class="p">:</span> <span class="s2">&quot;balance&quot;</span><span class="p">})</span>
+    <span class="n">cleaned_snapshot</span> <span class="o">=</span> <span class="n">cleaned_snapshot</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cleaned_snapshot</span>
+
+<span class="n">agi_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">agi_snapshots_raw</span><span class="p">]</span>
+<span class="n">agix_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">agix_snapshots_raw</span><span class="p">]</span>
+
+<span class="n">lp_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">lp_snapshots_raw</span><span class="p">]</span>
+<span class="n">stakers_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">stakers_snapshots_raw</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="c1"># Address and balance from the account with the largest holding, one of the Binance wallets</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;address&#39;, &#39;balance&#39;], dtype=&#39;object&#39;)
+address    0xbe0eb53f46cd790cd13851d5eff43d12404d33e8
+balance                           14182336000000000.0
+Name: 0, dtype: object
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="calculate-eligibility">
+<h2>2. Calculate eligibility<a class="headerlink" href="#calculate-eligibility" title="Permalink to this headline">¶</a></h2>
+<p>With the snapshot data ready, we can start to calculate the eligible addresses.</p>
+<p>Note that the following is intended to illustrate the process, but with the actual dataset of snapshots, a similar but more complex processing would be applied.</p>
+<p>Additionally, for the sake of the example, this process will only take into account holders, ignoring stakers and liquidity providers.</p>
+<p>Nonetheless, it’s feasible to adapt this same series of steps to stakers and liquidity providers, by preparing their respective datasets as described in step 1.</p>
+<div class="section" id="initial-snapshot">
+<h3>Initial snapshot<a class="headerlink" href="#initial-snapshot" title="Permalink to this headline">¶</a></h3>
+<p>There’s an initial snapshot that delimits how many addresses are eligible for the airdrop.</p>
+<p>In my case it’s the snapshot of the frozen AGI balances, but in the airdrop it would be the snapshot from 17th of April 2021, at 23:59 UTC+0.</p>
+<p>Let’s create a subset based on the addresses from the first snapshot that have more than 1.000 AGI.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AGI Snapshots: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AGIX Snapshots: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">agix_snapshots</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LP Snapshots: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">lp_snapshots</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stakers Snapshots: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">stakers_snapshots</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+
+<span class="c1"># Get the first snapshot and use it as the starting point for the calculations</span>
+<span class="k">def</span> <span class="nf">get_initial</span><span class="p">(</span><span class="n">initial_snapshot</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+    <span class="n">total_addresses</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_snapshot</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">eligible_addresses_initial</span> <span class="o">=</span> <span class="n">initial_snapshot</span><span class="p">[</span><span class="n">initial_snapshot</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">AGI_THRESHOLD</span><span class="p">]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Addresses (</span><span class="si">%s</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">total_addresses</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Eligible Addresses (</span><span class="si">%s</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_addresses_initial</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">eligible_addresses_initial</span>
+
+<span class="n">eligible_addresses_holders</span> <span class="o">=</span> <span class="n">get_initial</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;holders&#39;</span><span class="p">)</span>
+<span class="n">eligible_addresses_lp</span> <span class="o">=</span> <span class="n">get_initial</span><span class="p">(</span><span class="n">lp_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;LP&#39;</span><span class="p">)</span>
+<span class="n">eligible_addresses_stakers</span> <span class="o">=</span> <span class="n">get_initial</span><span class="p">(</span><span class="n">stakers_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;stakers&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="c1"># Print address with smaller eligible balance</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AGI Snapshots: 1
+AGIX Snapshots: 3
+LP Snapshots: 3
+Stakers Snapshots: 3
+
+Total Addresses (holders): 25247
+Eligible Addresses (holders): 16368
+
+Total Addresses (LP): 189
+Eligible Addresses (LP): 111
+
+Total Addresses (stakers): 1405
+Eligible Addresses (stakers): 946
+
+
+address    0x4c4ca064972ff8ff64568319c92367c159c52238
+balance                                100000000000.0
+Name: 16367, dtype: object
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can see that from the initial ~26k addresses, only 16689 pass the threshold to be eligible.</p>
+<p>Now, it’s a matter of iterating through the remaining snapshots using this initial set of accounts, and checking if the accounts are still eligible, removing the ones that are below the threshold.</p>
+</div>
+<div class="section" id="iterate-through-the-snapshots">
+<h3>Iterate through the snapshots<a class="headerlink" href="#iterate-through-the-snapshots" title="Permalink to this headline">¶</a></h3>
+<p>First, let’s merge all snapshots (AGI and AGIX) into a single array and discard the first one, as that one it’s already processed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Merge snapshots</span>
+<span class="n">holders_snapshots</span> <span class="o">=</span> <span class="n">agi_snapshots</span> <span class="o">+</span> <span class="n">agix_snapshots</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, we iterate over the snapshots, filtering the initial set of eligible accounts.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">filter_addresses</span><span class="p">(</span><span class="n">initial_df</span><span class="p">,</span> <span class="n">snapshot_df</span><span class="p">):</span>
+    <span class="c1"># Calculate intersection of eligible addresses between existing set and snapshot set</span>
+    <span class="n">initial_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">initial_df</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">])</span>
+    <span class="n">snapshot_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">snapshot_df</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">])</span>
+    <span class="n">addresses_intersection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">initial_set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">snapshot_set</span><span class="p">))</span>
+    
+    <span class="c1"># Filter addresses based on whether they&#39;re contained on the intersection set or not</span>
+    <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">initial_df</span><span class="p">[</span><span class="n">initial_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">addresses_intersection</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">filter_lowest_balance</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">],</span> <span class="n">snapshot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">snapshot_df</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;balance&#39;</span><span class="p">]])</span>
+    
+    <span class="c1"># Set balance amount to the lowest of the two values (initial value and snapshot value),</span>
+    <span class="c1"># to only take into account the lower balance</span>
+    <span class="n">filtered_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="n">filter_lowest_balance</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">filtered_df</span>
+
+<span class="k">def</span> <span class="nf">get_eligible</span><span class="p">(</span><span class="n">initial_df</span><span class="p">,</span> <span class="n">snapshots</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Initial Eligible Addresses (</span><span class="si">%s</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_df</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="n">eligible_df</span> <span class="o">=</span> <span class="n">initial_df</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">snapshots</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Snapshot #</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">index</span><span class="p">)</span>
+        <span class="n">snapshot_eligible</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">AGI_THRESHOLD</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Eligible Addresses from snapshot: </span><span class="si">%s</span><span class="s1"> addresses&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">snapshot_eligible</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+        <span class="n">eligible_df</span> <span class="o">=</span> <span class="n">filter_addresses</span><span class="p">(</span><span class="n">eligible_df</span><span class="p">,</span> <span class="n">snapshot_eligible</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Eligible Addresses: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Eligible Addresses (</span><span class="si">%s</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_df</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    
+    <span class="k">return</span> <span class="n">eligible_df</span>
+    
+
+<span class="n">eligible_addresses_holders</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="p">,</span> <span class="n">holders_snapshots</span><span class="p">,</span> <span class="s1">&#39;holders&#39;</span><span class="p">)</span>
+<span class="n">eligible_addresses_lp</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_lp</span><span class="p">,</span> <span class="n">lp_snapshots</span><span class="p">,</span> <span class="s1">&#39;LP&#39;</span><span class="p">)</span>
+<span class="n">eligible_addresses_stakers</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="p">,</span> <span class="n">stakers_snapshots</span><span class="p">,</span> <span class="s1">&#39;stakers&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Initial Eligible Addresses (holders): 16368
+
+Snapshot #0
+Eligible Addresses from snapshot: 16368 addresses
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|                                                                                                                                                                              | 0/16368 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|▊                                                                                                                                                                   | 77/16368 [00:00&lt;00:21, 769.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|█▌                                                                                                                                                                 | 154/16368 [00:00&lt;00:21, 747.84it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|██▎                                                                                                                                                                | 229/16368 [00:00&lt;00:21, 735.59it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|███                                                                                                                                                                | 304/16368 [00:00&lt;00:21, 741.16it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|███▊                                                                                                                                                               | 379/16368 [00:00&lt;00:21, 744.27it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|████▌                                                                                                                                                              | 455/16368 [00:00&lt;00:21, 749.57it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|█████▎                                                                                                                                                             | 530/16368 [00:00&lt;00:21, 749.71it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  4%|██████                                                                                                                                                             | 605/16368 [00:00&lt;00:21, 747.43it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  4%|██████▊                                                                                                                                                            | 680/16368 [00:00&lt;00:21, 739.06it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  5%|███████▌                                                                                                                                                           | 754/16368 [00:01&lt;00:21, 734.86it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  5%|████████▎                                                                                                                                                          | 830/16368 [00:01&lt;00:20, 742.46it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|█████████                                                                                                                                                          | 905/16368 [00:01&lt;00:21, 706.39it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|█████████▋                                                                                                                                                         | 977/16368 [00:01&lt;00:22, 686.44it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|██████████▍                                                                                                                                                       | 1051/16368 [00:01&lt;00:21, 701.63it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  7%|███████████                                                                                                                                                       | 1123/16368 [00:01&lt;00:21, 704.91it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  7%|███████████▊                                                                                                                                                      | 1194/16368 [00:01&lt;00:21, 704.34it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|████████████▌                                                                                                                                                     | 1265/16368 [00:01&lt;00:22, 683.50it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|█████████████▏                                                                                                                                                    | 1334/16368 [00:01&lt;00:24, 620.79it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|█████████████▊                                                                                                                                                    | 1398/16368 [00:01&lt;00:23, 624.32it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|██████████████▌                                                                                                                                                   | 1472/16368 [00:02&lt;00:22, 652.99it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|███████████████▏                                                                                                                                                  | 1539/16368 [00:02&lt;00:22, 655.96it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 10%|███████████████▉                                                                                                                                                  | 1606/16368 [00:02&lt;00:24, 601.11it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 10%|████████████████▌                                                                                                                                                 | 1668/16368 [00:02&lt;00:27, 540.00it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|█████████████████▏                                                                                                                                                | 1733/16368 [00:02&lt;00:25, 566.87it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|█████████████████▋                                                                                                                                                | 1792/16368 [00:02&lt;00:26, 559.56it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|██████████████████▎                                                                                                                                               | 1850/16368 [00:02&lt;00:25, 563.59it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 12%|██████████████████▉                                                                                                                                               | 1917/16368 [00:02&lt;00:24, 593.35it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 12%|███████████████████▋                                                                                                                                              | 1990/16368 [00:02&lt;00:22, 628.77it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 13%|████████████████████▍                                                                                                                                             | 2063/16368 [00:03&lt;00:21, 654.20it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 13%|█████████████████████                                                                                                                                             | 2132/16368 [00:03&lt;00:21, 664.60it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 13%|█████████████████████▊                                                                                                                                            | 2206/16368 [00:03&lt;00:20, 682.71it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 14%|██████████████████████▌                                                                                                                                           | 2282/16368 [00:03&lt;00:19, 704.33it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 14%|███████████████████████▎                                                                                                                                          | 2358/16368 [00:03&lt;00:19, 720.75it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 15%|████████████████████████                                                                                                                                          | 2436/16368 [00:03&lt;00:18, 736.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 15%|████████████████████████▊                                                                                                                                         | 2513/16368 [00:03&lt;00:18, 744.00it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 16%|█████████████████████████▌                                                                                                                                        | 2589/16368 [00:03&lt;00:18, 748.76it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 16%|██████████████████████████▎                                                                                                                                       | 2664/16368 [00:03&lt;00:18, 738.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 17%|███████████████████████████                                                                                                                                       | 2738/16368 [00:04&lt;00:18, 732.20it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 17%|███████████████████████████▊                                                                                                                                      | 2812/16368 [00:04&lt;00:18, 725.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 18%|████████████████████████████▌                                                                                                                                     | 2885/16368 [00:04&lt;00:19, 676.29it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 18%|█████████████████████████████▏                                                                                                                                    | 2954/16368 [00:04&lt;00:20, 652.62it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 18%|█████████████████████████████▉                                                                                                                                    | 3024/16368 [00:04&lt;00:20, 663.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 19%|██████████████████████████████▌                                                                                                                                   | 3093/16368 [00:04&lt;00:19, 671.33it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 19%|███████████████████████████████▎                                                                                                                                  | 3164/16368 [00:04&lt;00:19, 682.48it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 20%|████████████████████████████████                                                                                                                                  | 3236/16368 [00:04&lt;00:18, 693.43it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 20%|████████████████████████████████▋                                                                                                                                 | 3308/16368 [00:04&lt;00:18, 699.19it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 21%|█████████████████████████████████▍                                                                                                                                | 3381/16368 [00:04&lt;00:18, 706.20it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 21%|██████████████████████████████████▏                                                                                                                               | 3456/16368 [00:05&lt;00:17, 719.17it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 22%|██████████████████████████████████▉                                                                                                                               | 3529/16368 [00:05&lt;00:17, 718.09it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 22%|███████████████████████████████████▋                                                                                                                              | 3604/16368 [00:05&lt;00:17, 727.54it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 22%|████████████████████████████████████▍                                                                                                                             | 3677/16368 [00:05&lt;00:17, 728.27it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 23%|█████████████████████████████████████▏                                                                                                                            | 3755/16368 [00:05&lt;00:17, 739.30it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 23%|█████████████████████████████████████▉                                                                                                                            | 3831/16368 [00:05&lt;00:16, 743.25it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 24%|██████████████████████████████████████▋                                                                                                                           | 3907/16368 [00:05&lt;00:16, 748.21it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 24%|███████████████████████████████████████▍                                                                                                                          | 3983/16368 [00:05&lt;00:16, 751.73it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 25%|████████████████████████████████████████▏                                                                                                                         | 4059/16368 [00:05&lt;00:16, 751.97it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 25%|████████████████████████████████████████▉                                                                                                                         | 4135/16368 [00:05&lt;00:16, 752.10it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 26%|█████████████████████████████████████████▋                                                                                                                        | 4211/16368 [00:06&lt;00:16, 752.21it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 26%|██████████████████████████████████████████▍                                                                                                                       | 4287/16368 [00:06&lt;00:16, 741.29it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 27%|███████████████████████████████████████████▏                                                                                                                      | 4362/16368 [00:06&lt;00:16, 730.92it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 27%|███████████████████████████████████████████▉                                                                                                                      | 4436/16368 [00:06&lt;00:16, 704.69it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 28%|████████████████████████████████████████████▋                                                                                                                     | 4511/16368 [00:06&lt;00:16, 715.62it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 28%|█████████████████████████████████████████████▍                                                                                                                    | 4588/16368 [00:06&lt;00:16, 729.28it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 28%|██████████████████████████████████████████████▏                                                                                                                   | 4663/16368 [00:06&lt;00:15, 735.30it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 29%|██████████████████████████████████████████████▉                                                                                                                   | 4737/16368 [00:06&lt;00:16, 711.56it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 29%|███████████████████████████████████████████████▌                                                                                                                  | 4809/16368 [00:06&lt;00:16, 692.00it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 30%|████████████████████████████████████████████████▎                                                                                                                 | 4879/16368 [00:07&lt;00:17, 642.84it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 30%|████████████████████████████████████████████████▉                                                                                                                 | 4945/16368 [00:07&lt;00:18, 609.07it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 31%|█████████████████████████████████████████████████▋                                                                                                                | 5016/16368 [00:07&lt;00:17, 636.25it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 31%|██████████████████████████████████████████████████▎                                                                                                               | 5087/16368 [00:07&lt;00:17, 653.11it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 32%|███████████████████████████████████████████████████                                                                                                               | 5162/16368 [00:07&lt;00:16, 678.61it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 32%|███████████████████████████████████████████████████▊                                                                                                              | 5238/16368 [00:07&lt;00:15, 701.97it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 32%|████████████████████████████████████████████████████▌                                                                                                             | 5313/16368 [00:07&lt;00:15, 713.87it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 33%|█████████████████████████████████████████████████████▎                                                                                                            | 5389/16368 [00:07&lt;00:15, 727.38it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 33%|██████████████████████████████████████████████████████                                                                                                            | 5463/16368 [00:07&lt;00:14, 728.98it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 34%|██████████████████████████████████████████████████████▊                                                                                                           | 5537/16368 [00:07&lt;00:15, 711.19it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 34%|███████████████████████████████████████████████████████▌                                                                                                          | 5609/16368 [00:08&lt;00:15, 697.51it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 35%|████████████████████████████████████████████████████████▏                                                                                                         | 5679/16368 [00:08&lt;00:15, 682.45it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 35%|████████████████████████████████████████████████████████▉                                                                                                         | 5753/16368 [00:08&lt;00:15, 697.00it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 36%|█████████████████████████████████████████████████████████▋                                                                                                        | 5828/16368 [00:08&lt;00:14, 711.27it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 36%|██████████████████████████████████████████████████████████▍                                                                                                       | 5905/16368 [00:08&lt;00:14, 726.34it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 37%|███████████████████████████████████████████████████████████▏                                                                                                      | 5979/16368 [00:08&lt;00:14, 730.34it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 37%|███████████████████████████████████████████████████████████▉                                                                                                      | 6053/16368 [00:08&lt;00:14, 731.03it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 37%|████████████████████████████████████████████████████████████▋                                                                                                     | 6127/16368 [00:08&lt;00:13, 731.52it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 38%|█████████████████████████████████████████████████████████████▎                                                                                                    | 6201/16368 [00:08&lt;00:13, 734.04it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 38%|██████████████████████████████████████████████████████████████▏                                                                                                   | 6278/16368 [00:09&lt;00:13, 740.37it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 39%|██████████████████████████████████████████████████████████████▉                                                                                                   | 6353/16368 [00:09&lt;00:13, 738.83it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 39%|███████████████████████████████████████████████████████████████▌                                                                                                  | 6427/16368 [00:09&lt;00:13, 732.66it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 40%|████████████████████████████████████████████████████████████████▎                                                                                                 | 6501/16368 [00:09&lt;00:13, 731.46it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 40%|█████████████████████████████████████████████████████████████████                                                                                                 | 6575/16368 [00:09&lt;00:13, 727.53it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 41%|█████████████████████████████████████████████████████████████████▊                                                                                                | 6651/16368 [00:09&lt;00:13, 737.12it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 41%|██████████████████████████████████████████████████████████████████▌                                                                                               | 6727/16368 [00:09&lt;00:12, 741.71it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 42%|███████████████████████████████████████████████████████████████████▎                                                                                              | 6803/16368 [00:09&lt;00:12, 747.14it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 42%|████████████████████████████████████████████████████████████████████                                                                                              | 6879/16368 [00:09&lt;00:12, 748.74it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 42%|████████████████████████████████████████████████████████████████████▊                                                                                             | 6954/16368 [00:09&lt;00:12, 749.12it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 43%|█████████████████████████████████████████████████████████████████████▌                                                                                            | 7029/16368 [00:10&lt;00:12, 744.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 43%|██████████████████████████████████████████████████████████████████████▎                                                                                           | 7104/16368 [00:10&lt;00:12, 746.41it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 44%|███████████████████████████████████████████████████████████████████████                                                                                           | 7179/16368 [00:10&lt;00:12, 738.69it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 44%|███████████████████████████████████████████████████████████████████████▊                                                                                          | 7255/16368 [00:10&lt;00:12, 742.79it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 45%|████████████████████████████████████████████████████████████████████████▌                                                                                         | 7331/16368 [00:10&lt;00:12, 745.70it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 45%|█████████████████████████████████████████████████████████████████████████▎                                                                                        | 7406/16368 [00:10&lt;00:12, 742.56it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 46%|██████████████████████████████████████████████████████████████████████████                                                                                        | 7482/16368 [00:10&lt;00:11, 747.73it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 46%|██████████████████████████████████████████████████████████████████████████▊                                                                                       | 7558/16368 [00:10&lt;00:11, 749.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 47%|███████████████████████████████████████████████████████████████████████████▌                                                                                      | 7633/16368 [00:10&lt;00:11, 749.40it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 47%|████████████████████████████████████████████████████████████████████████████▎                                                                                     | 7708/16368 [00:10&lt;00:11, 742.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 48%|█████████████████████████████████████████████████████████████████████████████                                                                                     | 7785/16368 [00:11&lt;00:11, 750.97it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 48%|█████████████████████████████████████████████████████████████████████████████▊                                                                                    | 7861/16368 [00:11&lt;00:11, 742.60it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 48%|██████████████████████████████████████████████████████████████████████████████▌                                                                                   | 7936/16368 [00:11&lt;00:11, 736.08it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 49%|███████████████████████████████████████████████████████████████████████████████▎                                                                                  | 8011/16368 [00:11&lt;00:11, 740.18it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 49%|████████████████████████████████████████████████████████████████████████████████                                                                                  | 8087/16368 [00:11&lt;00:11, 746.02it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 50%|████████████████████████████████████████████████████████████████████████████████▊                                                                                 | 8162/16368 [00:11&lt;00:11, 744.99it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 50%|█████████████████████████████████████████████████████████████████████████████████▌                                                                                | 8237/16368 [00:11&lt;00:10, 744.29it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 51%|██████████████████████████████████████████████████████████████████████████████████▎                                                                               | 8313/16368 [00:11&lt;00:10, 746.74it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 51%|███████████████████████████████████████████████████████████████████████████████████                                                                               | 8388/16368 [00:11&lt;00:10, 747.69it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 52%|███████████████████████████████████████████████████████████████████████████████████▊                                                                              | 8463/16368 [00:11&lt;00:10, 743.94it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 52%|████████████████████████████████████████████████████████████████████████████████████▌                                                                             | 8539/16368 [00:12&lt;00:10, 746.49it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 53%|█████████████████████████████████████████████████████████████████████████████████████▎                                                                            | 8616/16368 [00:12&lt;00:10, 749.05it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 53%|██████████████████████████████████████████████████████████████████████████████████████                                                                            | 8691/16368 [00:12&lt;00:10, 749.31it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 54%|██████████████████████████████████████████████████████████████████████████████████████▊                                                                           | 8769/16368 [00:12&lt;00:10, 753.99it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 54%|███████████████████████████████████████████████████████████████████████████████████████▌                                                                          | 8845/16368 [00:12&lt;00:10, 733.95it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 55%|████████████████████████████████████████████████████████████████████████████████████████▎                                                                         | 8921/16368 [00:12&lt;00:10, 739.39it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 55%|█████████████████████████████████████████████████████████████████████████████████████████                                                                         | 8997/16368 [00:12&lt;00:09, 741.09it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 55%|█████████████████████████████████████████████████████████████████████████████████████████▊                                                                        | 9073/16368 [00:12&lt;00:09, 746.64it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 56%|██████████████████████████████████████████████████████████████████████████████████████████▌                                                                       | 9148/16368 [00:12&lt;00:09, 738.88it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 56%|███████████████████████████████████████████████████████████████████████████████████████████▎                                                                      | 9223/16368 [00:12&lt;00:09, 742.16it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 57%|████████████████████████████████████████████████████████████████████████████████████████████                                                                      | 9298/16368 [00:13&lt;00:09, 710.73it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 57%|████████████████████████████████████████████████████████████████████████████████████████████▋                                                                     | 9371/16368 [00:13&lt;00:09, 714.22it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 58%|█████████████████████████████████████████████████████████████████████████████████████████████▍                                                                    | 9444/16368 [00:13&lt;00:09, 718.81it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 58%|██████████████████████████████████████████████████████████████████████████████████████████████▏                                                                   | 9517/16368 [00:13&lt;00:09, 700.91it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 59%|██████████████████████████████████████████████████████████████████████████████████████████████▉                                                                   | 9588/16368 [00:13&lt;00:09, 703.54it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 59%|███████████████████████████████████████████████████████████████████████████████████████████████▌                                                                  | 9659/16368 [00:13&lt;00:09, 695.01it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 59%|████████████████████████████████████████████████████████████████████████████████████████████████▎                                                                 | 9729/16368 [00:13&lt;00:09, 664.70it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 60%|█████████████████████████████████████████████████████████████████████████████████████████████████                                                                 | 9805/16368 [00:13&lt;00:09, 689.85it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 60%|█████████████████████████████████████████████████████████████████████████████████████████████████▊                                                                | 9882/16368 [00:13&lt;00:09, 710.91it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 61%|██████████████████████████████████████████████████████████████████████████████████████████████████▌                                                               | 9958/16368 [00:14&lt;00:08, 725.20it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 61%|██████████████████████████████████████████████████████████████████████████████████████████████████▋                                                              | 10034/16368 [00:14&lt;00:08, 733.27it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 62%|███████████████████████████████████████████████████████████████████████████████████████████████████▍                                                             | 10108/16368 [00:14&lt;00:08, 728.80it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 62%|████████████████████████████████████████████████████████████████████████████████████████████████████▏                                                            | 10185/16368 [00:14&lt;00:08, 737.60it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 63%|████████████████████████████████████████████████████████████████████████████████████████████████████▉                                                            | 10260/16368 [00:14&lt;00:08, 739.07it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 63%|█████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                           | 10337/16368 [00:14&lt;00:08, 746.02it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 64%|██████████████████████████████████████████████████████████████████████████████████████████████████████▍                                                          | 10414/16368 [00:14&lt;00:07, 753.13it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 64%|███████████████████████████████████████████████████████████████████████████████████████████████████████▏                                                         | 10491/16368 [00:14&lt;00:07, 758.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 65%|███████████████████████████████████████████████████████████████████████████████████████████████████████▉                                                         | 10567/16368 [00:14&lt;00:07, 756.44it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 65%|████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                        | 10643/16368 [00:14&lt;00:07, 750.79it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 65%|█████████████████████████████████████████████████████████████████████████████████████████████████████████▍                                                       | 10719/16368 [00:15&lt;00:07, 751.28it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 66%|██████████████████████████████████████████████████████████████████████████████████████████████████████████▏                                                      | 10795/16368 [00:15&lt;00:07, 745.02it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 66%|██████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                                      | 10870/16368 [00:15&lt;00:07, 737.77it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 67%|███████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                     | 10947/16368 [00:15&lt;00:07, 745.04it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 67%|████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                                                    | 11022/16368 [00:15&lt;00:07, 744.33it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 68%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                                                   | 11097/16368 [00:15&lt;00:07, 745.98it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 68%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                                   | 11173/16368 [00:15&lt;00:06, 750.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 69%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                  | 11249/16368 [00:15&lt;00:06, 750.85it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 69%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                                                 | 11325/16368 [00:15&lt;00:06, 740.36it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 70%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                                                | 11400/16368 [00:15&lt;00:06, 743.18it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 70%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                                                | 11475/16368 [00:16&lt;00:06, 743.00it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 71%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                                               | 11550/16368 [00:16&lt;00:06, 734.20it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 71%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                              | 11624/16368 [00:16&lt;00:06, 735.91it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 71%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████                                              | 11698/16368 [00:16&lt;00:06, 737.12it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 72%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                                             | 11772/16368 [00:16&lt;00:06, 726.97it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 72%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                                            | 11848/16368 [00:16&lt;00:06, 734.55it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 73%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                           | 11924/16368 [00:16&lt;00:05, 742.08it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 73%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████                                           | 12001/16368 [00:16&lt;00:05, 745.94it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 74%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                                          | 12076/16368 [00:16&lt;00:05, 747.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 74%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                                         | 12151/16368 [00:16&lt;00:05, 745.77it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 75%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                        | 12226/16368 [00:17&lt;00:05, 747.03it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 75%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                        | 12301/16368 [00:17&lt;00:05, 739.09it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 76%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                       | 12376/16368 [00:17&lt;00:05, 742.33it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 76%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                                      | 12451/16368 [00:17&lt;00:05, 744.61it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 77%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                                     | 12526/16368 [00:17&lt;00:05, 688.71it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 77%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                     | 12597/16368 [00:17&lt;00:05, 694.72it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 77%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                                    | 12668/16368 [00:17&lt;00:05, 691.16it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 78%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                   | 12738/16368 [00:17&lt;00:05, 687.75it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 78%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                   | 12808/16368 [00:17&lt;00:05, 658.80it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 79%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                  | 12875/16368 [00:18&lt;00:05, 623.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 79%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                 | 12945/16368 [00:18&lt;00:05, 640.82it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 79%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                 | 13010/16368 [00:18&lt;00:05, 605.86it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 80%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                                | 13075/16368 [00:18&lt;00:05, 617.04it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 80%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                               | 13138/16368 [00:18&lt;00:05, 612.08it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 81%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                               | 13200/16368 [00:18&lt;00:05, 595.72it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 81%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                              | 13260/16368 [00:18&lt;00:05, 590.26it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 81%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                             | 13332/16368 [00:18&lt;00:04, 627.25it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 82%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                             | 13396/16368 [00:18&lt;00:04, 623.72it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 82%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                            | 13459/16368 [00:18&lt;00:04, 621.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 83%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████                            | 13529/16368 [00:19&lt;00:04, 644.71it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 83%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                           | 13594/16368 [00:19&lt;00:04, 644.37it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 83%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                          | 13664/16368 [00:19&lt;00:04, 659.70it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 84%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████                          | 13734/16368 [00:19&lt;00:03, 669.66it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 84%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                         | 13802/16368 [00:19&lt;00:04, 633.26it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 85%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                        | 13874/16368 [00:19&lt;00:03, 657.85it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 85%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                       | 13942/16368 [00:19&lt;00:03, 664.26it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 86%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                       | 14013/16368 [00:19&lt;00:03, 677.64it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 86%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                      | 14087/16368 [00:19&lt;00:03, 693.98it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 86%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                     | 14157/16368 [00:20&lt;00:03, 664.26it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 87%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                     | 14232/16368 [00:20&lt;00:03, 686.93it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 87%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                    | 14303/16368 [00:20&lt;00:02, 693.63it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 88%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                   | 14378/16368 [00:20&lt;00:02, 710.13it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 88%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏                  | 14454/16368 [00:20&lt;00:02, 722.75it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 89%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                  | 14530/16368 [00:20&lt;00:02, 731.61it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 89%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                 | 14605/16368 [00:20&lt;00:02, 737.06it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 90%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                | 14680/16368 [00:20&lt;00:02, 740.89it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 90%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏               | 14755/16368 [00:20&lt;00:02, 739.22it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 91%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊               | 14829/16368 [00:20&lt;00:02, 713.95it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 91%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌              | 14901/16368 [00:21&lt;00:02, 713.63it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 91%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎             | 14973/16368 [00:21&lt;00:01, 707.21it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 92%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉             | 15046/16368 [00:21&lt;00:01, 709.73it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 92%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋            | 15119/16368 [00:21&lt;00:01, 715.68it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 93%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍           | 15192/16368 [00:21&lt;00:01, 717.79it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 93%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏          | 15264/16368 [00:21&lt;00:01, 716.32it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 94%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉          | 15339/16368 [00:21&lt;00:01, 724.17it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 94%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌         | 15414/16368 [00:21&lt;00:01, 731.84it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 95%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎        | 15488/16368 [00:21&lt;00:01, 732.09it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 95%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████        | 15563/16368 [00:21&lt;00:01, 737.40it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 96%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊       | 15638/16368 [00:22&lt;00:00, 738.95it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 96%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌      | 15712/16368 [00:22&lt;00:00, 734.91it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 96%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎     | 15786/16368 [00:22&lt;00:00, 732.06it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 97%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████     | 15860/16368 [00:22&lt;00:00, 725.80it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 97%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋    | 15933/16368 [00:22&lt;00:00, 698.15it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 98%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍   | 16005/16368 [00:22&lt;00:00, 702.43it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 98%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏  | 16079/16368 [00:22&lt;00:00, 713.37it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 99%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉  | 16154/16368 [00:22&lt;00:00, 719.90it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 99%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌ | 16227/16368 [00:22&lt;00:00, 720.75it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎| 16300/16368 [00:22&lt;00:00, 715.03it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 16368/16368 [00:23&lt;00:00, 708.72it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Eligible Addresses: 16368
+
+Snapshot #1
+Eligible Addresses from snapshot: 16470 addresses
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|                                                                                                                                                                              | 0/15421 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|▊                                                                                                                                                                   | 74/15421 [00:00&lt;00:20, 739.99it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|█▌                                                                                                                                                                 | 148/15421 [00:00&lt;00:23, 655.20it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|██▎                                                                                                                                                                | 220/15421 [00:00&lt;00:22, 682.84it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|███                                                                                                                                                                | 292/15421 [00:00&lt;00:21, 694.28it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|███▊                                                                                                                                                               | 362/15421 [00:00&lt;00:21, 693.86it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|████▌                                                                                                                                                              | 432/15421 [00:00&lt;00:21, 686.76it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|█████▎                                                                                                                                                             | 503/15421 [00:00&lt;00:21, 691.97it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  4%|██████                                                                                                                                                             | 573/15421 [00:00&lt;00:21, 688.03it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  4%|██████▊                                                                                                                                                            | 646/15421 [00:00&lt;00:21, 698.76it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  5%|███████▌                                                                                                                                                           | 716/15421 [00:01&lt;00:23, 623.29it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  5%|████████▎                                                                                                                                                          | 789/15421 [00:01&lt;00:22, 649.45it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|█████████                                                                                                                                                          | 861/15421 [00:01&lt;00:21, 669.47it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|█████████▉                                                                                                                                                         | 936/15421 [00:01&lt;00:20, 690.73it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  7%|██████████▌                                                                                                                                                       | 1010/15421 [00:01&lt;00:20, 703.03it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  7%|███████████▍                                                                                                                                                      | 1085/15421 [00:01&lt;00:20, 716.78it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|████████████▏                                                                                                                                                     | 1161/15421 [00:01&lt;00:19, 729.54it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|████████████▉                                                                                                                                                     | 1235/15421 [00:01&lt;00:19, 728.34it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|█████████████▊                                                                                                                                                    | 1311/15421 [00:01&lt;00:19, 735.52it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|██████████████▌                                                                                                                                                   | 1386/15421 [00:01&lt;00:18, 739.82it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|███████████████▎                                                                                                                                                  | 1461/15421 [00:02&lt;00:19, 731.98it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 10%|████████████████▏                                                                                                                                                 | 1535/15421 [00:02&lt;00:18, 734.34it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 10%|████████████████▉                                                                                                                                                 | 1609/15421 [00:02&lt;00:18, 733.84it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|█████████████████▋                                                                                                                                                | 1684/15421 [00:02&lt;00:18, 738.64it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|██████████████████▍                                                                                                                                               | 1759/15421 [00:02&lt;00:18, 742.02it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 12%|███████████████████▎                                                                                                                                              | 1835/15421 [00:02&lt;00:18, 745.17it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 12%|████████████████████                                                                                                                                              | 1910/15421 [00:02&lt;00:18, 744.39it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 13%|████████████████████▊                                                                                                                                             | 1985/15421 [00:02&lt;00:18, 735.10it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 13%|████████████████████▉                                                                                                                                             | 1995/15421 [00:02&lt;00:18, 710.46it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">KeyboardInterrupt</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">9</span><span class="o">-</span><span class="mi">79610</span><span class="n">a7c4348</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span> 
+<span class="g g-Whitespace">     </span><span class="mi">38</span> 
+<span class="ne">---&gt; </span><span class="mi">39</span> <span class="n">eligible_addresses_holders</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="p">,</span> <span class="n">holders_snapshots</span><span class="p">,</span> <span class="s1">&#39;holders&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span> <span class="n">eligible_addresses_lp</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_lp</span><span class="p">,</span> <span class="n">lp_snapshots</span><span class="p">,</span> <span class="s1">&#39;LP&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span> <span class="n">eligible_addresses_stakers</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="p">,</span> <span class="n">stakers_snapshots</span><span class="p">,</span> <span class="s1">&#39;stakers&#39;</span><span class="p">)</span>
+
+<span class="nn">&lt;ipython-input-9-79610a7c4348&gt;</span> in <span class="ni">get_eligible</span><span class="nt">(initial_df, snapshots, category)</span>
+<span class="g g-Whitespace">     </span><span class="mi">28</span>         <span class="n">snapshot_eligible</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">AGI_THRESHOLD</span><span class="p">]</span>
+<span class="g g-Whitespace">     </span><span class="mi">29</span>         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Eligible Addresses from snapshot: </span><span class="si">%s</span><span class="s1"> addresses&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">snapshot_eligible</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+<span class="ne">---&gt; </span><span class="mi">30</span>         <span class="n">eligible_df</span> <span class="o">=</span> <span class="n">filter_addresses</span><span class="p">(</span><span class="n">eligible_df</span><span class="p">,</span> <span class="n">snapshot_eligible</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">31</span>         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Eligible Addresses: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">32</span>         <span class="nb">print</span><span class="p">()</span>
+
+<span class="nn">&lt;ipython-input-9-79610a7c4348&gt;</span> in <span class="ni">filter_addresses</span><span class="nt">(initial_df, snapshot_df)</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="c1"># Set balance amount to the lowest of the two values (initial value and snapshot value),</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span>     <span class="c1"># to only take into account the lower balance</span>
+<span class="ne">---&gt; </span><span class="mi">15</span>     <span class="n">filtered_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="n">filter_lowest_balance</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span> 
+<span class="g g-Whitespace">     </span><span class="mi">17</span>     <span class="k">return</span> <span class="n">filtered_df</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\tqdm\std.py</span> in <span class="ni">inner</span><span class="nt">(df, func, *args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">808</span>                 <span class="c1"># on the df using our wrapper (which provides bar updating)</span>
+<span class="g g-Whitespace">    </span><span class="mi">809</span>                 <span class="k">try</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">810</span>                     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">df_function</span><span class="p">)(</span><span class="n">wrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">811</span>                 <span class="k">finally</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">812</span>                     <span class="n">t</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\frame.py</span> in <span class="ni">apply</span><span class="nt">(self, func, axis, raw, result_type, args, **kwds)</span>
+<span class="g g-Whitespace">   </span><span class="mi">7766</span>             <span class="n">kwds</span><span class="o">=</span><span class="n">kwds</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">7767</span>         <span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">7768</span>         <span class="k">return</span> <span class="n">op</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">7769</span> 
+<span class="g g-Whitespace">   </span><span class="mi">7770</span>     <span class="k">def</span> <span class="nf">applymap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">na_action</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\apply.py</span> in <span class="ni">get_result</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">183</span>             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_raw</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">184</span> 
+<span class="ne">--&gt; </span><span class="mi">185</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_standard</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">186</span> 
+<span class="g g-Whitespace">    </span><span class="mi">187</span>     <span class="k">def</span> <span class="nf">apply_empty_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\apply.py</span> in <span class="ni">apply_standard</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">274</span> 
+<span class="g g-Whitespace">    </span><span class="mi">275</span>     <span class="k">def</span> <span class="nf">apply_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">276</span>         <span class="n">results</span><span class="p">,</span> <span class="n">res_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_series_generator</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">277</span> 
+<span class="g g-Whitespace">    </span><span class="mi">278</span>         <span class="c1"># wrap results</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\apply.py</span> in <span class="ni">apply_series_generator</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">288</span>             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series_gen</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">289</span>                 <span class="c1"># ignore SettingWithCopy here in case the user mutates</span>
+<span class="ne">--&gt; </span><span class="mi">290</span>                 <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">291</span>                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ABCSeries</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">292</span>                     <span class="c1"># If we have a view on v, we need to make a copy because</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\tqdm\std.py</span> in <span class="ni">wrapper</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">803</span>                     <span class="c1"># take a fast or slow code path; so stop when t.total==t.n</span>
+<span class="g g-Whitespace">    </span><span class="mi">804</span>                     <span class="n">t</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="o">.</span><span class="n">total</span> <span class="ow">or</span> <span class="n">t</span><span class="o">.</span><span class="n">n</span> <span class="o">&lt;</span> <span class="n">t</span><span class="o">.</span><span class="n">total</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">805</span>                     <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">806</span> 
+<span class="g g-Whitespace">    </span><span class="mi">807</span>                 <span class="c1"># Apply the provided function (in **kwargs)</span>
+
+<span class="nn">&lt;ipython-input-9-79610a7c4348&gt;</span> in <span class="ni">filter_lowest_balance</span><span class="nt">(x)</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> 
+<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="k">def</span> <span class="nf">filter_lowest_balance</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">11</span>         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">],</span> <span class="n">snapshot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">snapshot_df</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;balance&#39;</span><span class="p">]])</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> 
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="c1"># Set balance amount to the lowest of the two values (initial value and snapshot value),</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\indexing.py</span> in <span class="ni">__getitem__</span><span class="nt">(self, key)</span>
+<span class="g g-Whitespace">    </span><span class="mi">893</span> 
+<span class="g g-Whitespace">    </span><span class="mi">894</span>             <span class="n">maybe_callable</span> <span class="o">=</span> <span class="n">com</span><span class="o">.</span><span class="n">apply_if_callable</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">895</span>             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getitem_axis</span><span class="p">(</span><span class="n">maybe_callable</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">896</span> 
+<span class="g g-Whitespace">    </span><span class="mi">897</span>     <span class="k">def</span> <span class="nf">_is_scalar_access</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">):</span>
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\indexing.py</span> in <span class="ni">_getitem_axis</span><span class="nt">(self, key, axis)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1102</span>             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_slice_axis</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1103</span>         <span class="k">elif</span> <span class="n">com</span><span class="o">.</span><span class="n">is_bool_indexer</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1104</span>             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getbool_axis</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1105</span>         <span class="k">elif</span> <span class="n">is_list_like_indexer</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1106</span> 
+
+<span class="nn">c:\users\tomas\anaconda3\envs\workenv\lib\site-packages\pandas\core\indexing.py</span> in <span class="ni">_getbool_axis</span><span class="nt">(self, key, axis)</span>
+<span class="g g-Whitespace">    </span><span class="mi">911</span>         <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_get_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">912</span>         <span class="n">key</span> <span class="o">=</span> <span class="n">check_bool_indexer</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">913</span>         <span class="n">inds</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">914</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_take_with_is_copy</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">915</span> 
+
+<span class="ne">KeyboardInterrupt</span>: 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="calculating-airdrop-amount">
+<h3>Calculating airdrop amount<a class="headerlink" href="#calculating-airdrop-amount" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="parameters">
+<h4>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Decimals SDAO</span>
+
+<span class="n">DECIMALS_SDAO</span> <span class="o">=</span> <span class="mi">18</span>
+
+<span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">DECIMALS_SDAO</span><span class="p">)</span>
+
+<span class="c1"># Reward parameters</span>
+
+<span class="n">TOTAL_STAKING_REWARD</span> <span class="o">=</span> <span class="mf">550000.0</span>
+
+<span class="n">TOTAL_REWARD</span> <span class="o">=</span> <span class="mf">825000.0</span>
+
+<span class="c1"># Adjust rewards to be full balance</span>
+
+<span class="n">TOTAL_STAKING_REWARD</span> <span class="o">*=</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
+
+<span class="n">TOTAL_REWARD</span> <span class="o">*=</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
+
+<span class="k">def</span> <span class="nf">calculate_percentage</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">percentage</span><span class="p">,</span> <span class="n">decimals</span><span class="p">):</span>
+    <span class="c1"># Move the position of the floating point to have more precision around small percentages</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">total</span> <span class="o">*</span> <span class="p">(</span><span class="n">percentage</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">decimals</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">decimals</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="merge-address-lists">
+<h4>Merge address lists<a class="headerlink" href="#merge-address-lists" title="Permalink to this headline">¶</a></h4>
+<p>A single address could have multiple rewards. To account for this, we’ll merge all the eligible addresses into a single list, removing duplicates, and add an extra column for each kind of reward.</p>
+<p>That way, we’ll be able to show all the reward types in the airdrop portal.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">datasets_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;holder&quot;</span><span class="p">:</span> <span class="n">eligible_addresses_holders</span><span class="p">,</span>
+    <span class="s2">&quot;lp&quot;</span><span class="p">:</span> <span class="n">eligible_addresses_lp</span><span class="p">,</span>
+    <span class="s2">&quot;staker&quot;</span><span class="p">:</span> <span class="n">eligible_addresses_stakers</span>
+<span class="p">}</span>
+
+<span class="c1"># Merge all eligible addresses</span>
+
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">datasets_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s1">&#39;address&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total addresses participating in the airdrop: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">addresses_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+
+<span class="c1"># Append rewards to the provided column, matching addresses between both sets</span>
+<span class="k">def</span> <span class="nf">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_df</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">new_column_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_row_value_by_address</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+        <span class="n">matching_rows</span> <span class="o">=</span> <span class="n">rewards_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">rewards_df</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">address</span><span class="p">]</span>
+        <span class="n">total_matching_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_rows</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_matching_rows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">matching_rows</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">column</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">total_matching_rows</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error appending column to final file&#39;</span><span class="p">,</span> <span class="s1">&#39;addresses are duplicated&#39;</span><span class="p">)</span>
+    
+    <span class="n">result_df</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">new_column_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">new_column_name</span> <span class="o">=</span> <span class="n">column</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Appending &quot;</span><span class="si">%s</span><span class="s1">&quot; column to final file&#39;</span> <span class="o">%</span> <span class="n">new_column_name</span><span class="p">)</span>
+    <span class="n">result_df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result_df</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span> <span class="n">new_column_name</span><span class="p">,</span> <span class="n">addresses_df</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_row_value_by_address</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Total addresses participating in the airdrop: 15466
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="stakers">
+<h4>Stakers<a class="headerlink" href="#stakers" title="Permalink to this headline">¶</a></h4>
+<p>There are two kinds of rewards for stakers:</p>
+<ul class="simple">
+<li><p>Per user (divided equally among staking wallets)</p></li>
+<li><p>Per stake amount (delivered proportionally to the amounts staked)</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Eligible Stakers: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+
+<span class="n">rewards_stakers_df</span> <span class="o">=</span> <span class="n">eligible_addresses_stakers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Rewards per user</span>
+
+<span class="n">half_staking_reward</span> <span class="o">=</span> <span class="n">TOTAL_STAKING_REWARD</span> <span class="o">/</span> <span class="mi">2</span>
+
+<span class="n">reward_per_user</span> <span class="o">=</span> <span class="n">half_staking_reward</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="p">)</span>
+
+<span class="n">adjusted_reward_per_user</span> <span class="o">=</span> <span class="n">reward_per_user</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Staking reward per user: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">adjusted_reward_per_user</span><span class="p">)</span>
+
+<span class="n">rewards_stakers_df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rewards_stakers_df</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span> <span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">,</span> <span class="n">adjusted_reward_per_user</span><span class="p">)</span>
+
+<span class="c1"># Rewards per stake</span>
+
+<span class="n">total_stake</span> <span class="o">=</span> <span class="n">eligible_addresses_stakers</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rewards_stakers_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">calculate_percentage</span><span class="p">(</span><span class="n">half_staking_reward</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">total_stake</span><span class="p">),</span> <span class="n">DECIMALS_SDAO</span><span class="p">)</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">rewards_stakers_df</span><span class="p">)</span>
+
+<span class="n">adjusted_half_staker_reward</span> <span class="o">=</span> <span class="p">(</span><span class="n">half_staking_reward</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">)</span>
+
+<span class="n">calculated_staker_reward_per_user</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">]))</span>
+
+<span class="n">calculated_staker_reward_per_stake</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]))</span>
+
+<span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (stakers, per user): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">adjusted_half_staker_reward</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (stakers, per user): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">calculated_staker_reward_per_user</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (stakers, per stake): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">adjusted_half_staker_reward</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (stakers, per stake): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">calculated_staker_reward_per_stake</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (stakers, total): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">TOTAL_STAKING_REWARD</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (stakers, total): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">calculated_staker_reward_per_user</span> <span class="o">+</span> <span class="n">calculated_staker_reward_per_stake</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+
+<span class="n">per_user_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="n">calculated_staker_reward_per_user</span><span class="p">)</span> <span class="o">!=</span> <span class="n">adjusted_half_staker_reward</span>
+
+<span class="n">per_stake_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="n">calculated_staker_reward_per_stake</span><span class="p">)</span> <span class="o">!=</span> <span class="n">adjusted_half_staker_reward</span>
+
+<span class="n">total_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="n">calculated_staker_reward_per_user</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="n">calculated_staker_reward_per_stake</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="n">adjusted_half_staker_reward</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">per_user_error</span> <span class="ow">or</span> <span class="n">per_stake_error</span> <span class="ow">or</span> <span class="n">total_error</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error calculating rewards (stakers)&#39;</span><span class="p">,</span> <span class="s1">&#39;final reward sum does not match allocated reward&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Total Eligible Stakers: 945
+Staking reward per user: 291.005291005291
+                                        address       balance  \
+0    0x0c14e2eecf6e8fc9042b91ced084ea0d7b9360de  6.469991e+14   
+1    0x07037fe3212eb56476d28fd0baaa4d1298cf571e  3.948147e+14   
+2    0x09363887a4096b142f3f6b58a7eed2f1a0ff7343  1.427428e+14   
+3    0x09ade54ba605dde33fd467ae0e05cdd64dafbc55  1.048798e+14   
+4    0x0181a709e165195bd67651bb5304b4cab6e0ada2  7.000000e+13   
+..                                          ...           ...   
+941  0x06230a286bd4ce2305640b4052fb8c8c64a9d2f2  1.000000e+11   
+942  0x0491e6133cc25a5debe5f44b782282ea64c2d8e5  1.000000e+11   
+943  0x001c46ba3a0d7f09302961f4811dc0521c0c3545  1.000000e+11   
+944  0x09a3741d22e8091a00d8041a92e7501bd069b517  1.000000e+11   
+945  0x0048a27710c2714b038186d055dd514688d8f707  1.000000e+11   
+
+     staker_reward_per_user  staker_reward_per_stake  
+0                291.005291             54438.750011  
+1                291.005291             33219.858812  
+2                291.005291             12010.433407  
+3                291.005291              8824.626206  
+4                291.005291              5889.826587  
+..                      ...                      ...  
+941              291.005291                 8.414038  
+942              291.005291                 8.414038  
+943              291.005291                 8.414038  
+944              291.005291                 8.414038  
+945              291.005291                 8.414038  
+
+[945 rows x 4 columns]
+
+Allocated reward (stakers, per user): 275000.0
+Calculated reward (stakers, per user): 275000.0
+
+Allocated reward (stakers, per stake): 275000.0
+Calculated reward (stakers, per stake): 275000.0
+
+Allocated reward (stakers, total): 550000.0
+Calculated reward (stakers, total): 550000.0
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="add-the-calculated-rewards-to-final-data-frame">
+<h5>Add the calculated rewards to final data frame<a class="headerlink" href="#add-the-calculated-rewards-to-final-data-frame" title="Permalink to this headline">¶</a></h5>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">)</span>
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">)</span>
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_staker_balance&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  4%|█████▉                                                                                                                                                            | 566/15466 [00:00&lt;00:05, 2829.98it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;staker_reward_per_user&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2798.70it/s]
+  4%|█████▉                                                                                                                                                            | 568/15466 [00:00&lt;00:05, 2793.86it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;staker_reward_per_stake&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2790.54it/s]
+  4%|█████▊                                                                                                                                                            | 555/15466 [00:00&lt;00:05, 2761.40it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;used_staker_balance&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2798.99it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          address  staker_reward_per_user  \
+0      0xbe0eb53f46cd790cd13851d5eff43d12404d33e8                0.000000   
+1      0xf977814e90da44bfa03b6295a0616a897441acec                0.000000   
+2      0xa1d8d972560c2f8144af871db508f0b0b10a3fbf                0.000000   
+3      0x19184ab45c40c2920b0e0e31413b9434abd243ed                0.000000   
+4      0x8699b0ffff9136df5fed0175baf4b65477378a3d                0.000000   
+...                                           ...                     ...   
+15461  0x00ea21e18daad781dfa97130e09c6e41c007dbbd              291.005291   
+15462  0x0a97a90e73af39c1819bafe9fc8846573d055ab1              291.005291   
+15463  0x0e5767bc10e638fa27475046e9edba581ed92dcf              291.005291   
+15464  0x0024b5903f0eb068e77f3e796bd2edea926c26e5              291.005291   
+15465  0x0b6010d0985ea30a99bd00a858724ed3896222fb              291.005291   
+
+       staker_reward_per_stake  used_staker_balance  
+0                     0.000000                  0.0  
+1                     0.000000                  0.0  
+2                     0.000000                  0.0  
+3                     0.000000                  0.0  
+4                     0.000000                  0.0  
+...                        ...                  ...  
+15461                 9.221786               1096.0  
+15462                 9.146059               1087.0  
+15463                 8.986193               1068.0  
+15464                 8.498178               1010.0  
+15465                 8.447694               1004.0  
+
+[15466 rows x 4 columns]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="holders-and-lp">
+<h4>Holders and LP<a class="headerlink" href="#holders-and-lp" title="Permalink to this headline">¶</a></h4>
+<p>Knowing the eligibility of the addresses, we can calculate the balances now using the following formula.</p>
+<p>With those premises in place, we can calculate the final reward for each user by using the following formula</p>
+<p><code class="docutils literal notranslate"><span class="pre">Reward</span> <span class="pre">=</span> <span class="pre">total_reward</span> <span class="pre">*</span> <span class="pre">log10(1+user_balance)</span> <span class="pre">/</span> <span class="pre">SUM(log10(1+user_balance))</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define SUM(log10(1+user_balance)) as a constant variable</span>
+
+<span class="n">holder_balances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">])</span>
+
+<span class="n">lp_balances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">eligible_addresses_lp</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">])</span>
+
+<span class="n">balances_log10</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">balance</span><span class="p">))</span> <span class="k">for</span> <span class="n">balance</span> <span class="ow">in</span> <span class="p">(</span><span class="n">holder_balances</span> <span class="o">+</span> <span class="n">lp_balances</span><span class="p">)]</span>
+
+<span class="n">sum_balances_log10</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">balances_log10</span><span class="p">)</span>
+
+<span class="c1"># Define the function that calculates the reward for each user</span>
+
+<span class="k">def</span> <span class="nf">calculate_reward</span><span class="p">(</span><span class="n">total_reward</span><span class="p">,</span> <span class="n">user_balance_index</span><span class="p">):</span>
+    <span class="n">user_balance_log10</span> <span class="o">=</span> <span class="n">balances_log10</span><span class="p">[</span><span class="n">user_balance_index</span><span class="p">]</span>
+    <span class="n">reward_percentage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">user_balance_log10</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">sum_balances_log10</span><span class="p">)</span>
+    <span class="c1"># Calculate reward and convert to final balance</span>
+    <span class="k">return</span> <span class="n">calculate_percentage</span><span class="p">(</span><span class="n">total_reward</span><span class="p">,</span> <span class="n">reward_percentage</span><span class="p">,</span> <span class="n">DECIMALS_AGI</span><span class="p">)</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
+
+<span class="c1"># Calculate rewards and add the SDAO value as a column to the DateFrame</span>
+
+<span class="n">holder_rewards</span> <span class="o">=</span> <span class="p">[</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">TOTAL_REWARD</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">balance</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">holder_balances</span><span class="p">)]</span>
+
+<span class="n">lp_rewards</span> <span class="o">=</span> <span class="p">[</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">TOTAL_REWARD</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">holder_balances</span><span class="p">)</span> <span class="o">+</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">balance</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lp_balances</span><span class="p">)]</span>
+
+<span class="n">holder_rewards_df</span> <span class="o">=</span> <span class="n">eligible_addresses_holders</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="n">lp_rewards_df</span> <span class="o">=</span> <span class="n">eligible_addresses_lp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="n">holder_rewards_df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="n">holder_rewards</span><span class="p">)</span>
+
+<span class="n">holder_rewards_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">holder_rewards_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span><span class="p">)</span>
+
+<span class="n">lp_rewards_df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="n">lp_rewards</span><span class="p">)</span>
+
+<span class="n">lp_rewards_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lp_rewards_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="verify-rewards">
+<h5>Verify rewards<a class="headerlink" href="#verify-rewards" title="Permalink to this headline">¶</a></h5>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify that the total amount of allocated reward matches the expected value</span>
+
+<span class="n">calculated_reward</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">holder_rewards_df</span><span class="p">[</span><span class="s1">&#39;reward&#39;</span><span class="p">]))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">lp_rewards_df</span><span class="p">[</span><span class="s1">&#39;reward&#39;</span><span class="p">]))</span>
+
+<span class="n">adjusted_total_reward</span> <span class="o">=</span> <span class="p">(</span><span class="n">TOTAL_REWARD</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">holder_balances</span> <span class="o">+</span> <span class="n">lp_balances</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">holder_balances</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">lp_balances</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">adjusted_total_reward</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">calculated_reward</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ulonglong</span><span class="p">(</span><span class="n">calculated_reward</span><span class="p">)</span> <span class="o">!=</span> <span class="n">adjusted_total_reward</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error calculating rewards&#39;</span><span class="p">,</span> <span class="s1">&#39;final reward sum does not match allocated reward&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>15509 15400 109
+Allocated reward (holders and LP): 825000.0
+Calculated reward (holders and LP): 825000.0
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="id1">
+<h5>Add the calculated rewards to final data frame<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h5>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add rewards to final data frame</span>
+
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">holder_rewards_df</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="s1">&#39;holder_reward&#39;</span><span class="p">)</span>
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">holder_rewards_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_holder_balance&#39;</span><span class="p">)</span>
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">lp_rewards_df</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="s1">&#39;lp_reward&#39;</span><span class="p">)</span>
+<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">lp_rewards_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_lp_balance&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|                                                                                                                                                                              | 0/15466 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;holder_reward&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:20&lt;00:00, 739.26it/s]
+  0%|▊                                                                                                                                                                   | 75/15466 [00:00&lt;00:20, 742.58it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;used_holder_balance&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:22&lt;00:00, 702.16it/s]
+  2%|███▏                                                                                                                                                              | 302/15466 [00:00&lt;00:05, 3020.00it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;lp_reward&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3198.08it/s]
+  4%|██████▉                                                                                                                                                           | 660/15466 [00:00&lt;00:04, 3295.27it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Appending &quot;used_lp_balance&quot; column to final file
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3286.74it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          address  staker_reward_per_user  \
+0      0xbe0eb53f46cd790cd13851d5eff43d12404d33e8                0.000000   
+1      0xf977814e90da44bfa03b6295a0616a897441acec                0.000000   
+2      0xa1d8d972560c2f8144af871db508f0b0b10a3fbf                0.000000   
+3      0x19184ab45c40c2920b0e0e31413b9434abd243ed                0.000000   
+4      0x8699b0ffff9136df5fed0175baf4b65477378a3d                0.000000   
+...                                           ...                     ...   
+15461  0x00ea21e18daad781dfa97130e09c6e41c007dbbd              291.005291   
+15462  0x0a97a90e73af39c1819bafe9fc8846573d055ab1              291.005291   
+15463  0x0e5767bc10e638fa27475046e9edba581ed92dcf              291.005291   
+15464  0x0024b5903f0eb068e77f3e796bd2edea926c26e5              291.005291   
+15465  0x0b6010d0985ea30a99bd00a858724ed3896222fb              291.005291   
+
+       staker_reward_per_stake  used_staker_balance  holder_reward  \
+0                     0.000000                  0.0      73.108181   
+1                     0.000000                  0.0      71.932905   
+2                     0.000000                  0.0      64.525292   
+3                     0.000000                  0.0      68.678821   
+4                     0.000000                  0.0      68.586702   
+...                        ...                  ...            ...   
+15461                 9.221786               1096.0       0.000000   
+15462                 9.146059               1087.0       0.000000   
+15463                 8.986193               1068.0       0.000000   
+15464                 8.498178               1010.0       0.000000   
+15465                 8.447694               1004.0       0.000000   
+
+       used_holder_balance  lp_reward  used_lp_balance  
+0              141823360.0        0.0              0.0  
+1               78000000.0        0.0              0.0  
+2                1801089.0        0.0              0.0  
+3               14899506.0        0.0              0.0  
+4               14217393.0        0.0              0.0  
+...                    ...        ...              ...  
+15461                  0.0        0.0              0.0  
+15462                  0.0        0.0              0.0  
+15463                  0.0        0.0              0.0  
+15464                  0.0        0.0              0.0  
+15465                  0.0        0.0              0.0  
+
+[15466 rows x 8 columns]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="adding-unclaimed-balances">
+<h3>Adding unclaimed balances<a class="headerlink" href="#adding-unclaimed-balances" title="Permalink to this headline">¶</a></h3>
+<p>The missing step would be sum all the unclaimed amount from previous airdrops, for this example that’s not possible with the data at hand though.</p>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+        
+        <div class='prev-next-bottom'>
+            
+
+        </div>
+        
+        </div>
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By The Jupyter Book community<br/>
+        
+            &copy; Copyright 2021.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+  
+  <script src="_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  
+  </body>
+</html>
