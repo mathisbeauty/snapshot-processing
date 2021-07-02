@@ -13099,6 +13099,30 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Reward parameters</span>
+
+<span class="n">TOTAL_STAKING_REWARD</span> <span class="o">=</span> <span class="mi">550000</span>
+
+<span class="n">TOTAL_REWARD</span> <span class="o">=</span> <span class="mi">825000</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Constants">Constants<a class="anchor-link" href="#Constants">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Decimals AGI/AGIX</span>
 
 <span class="n">DECIMALS_AGI</span> <span class="o">=</span> <span class="mi">8</span>
@@ -13113,12 +13137,6 @@ div#notebook {
 <span class="n">DECIMALS_SDAO</span> <span class="o">=</span> <span class="mi">18</span>
 
 <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">DECIMALS_SDAO</span>
-
-<span class="c1"># Reward parameters</span>
-
-<span class="n">TOTAL_STAKING_REWARD</span> <span class="o">=</span> <span class="mi">550000</span>
-
-<span class="n">TOTAL_REWARD</span> <span class="o">=</span> <span class="mi">825000</span>
 
 <span class="c1"># Adjust rewards to be full balance</span>
 
@@ -13150,7 +13168,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Import libraries</span>
@@ -13181,7 +13199,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_snapshots</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -13224,14 +13242,14 @@ div#notebook {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Load snapshots for liquidity providers and stakers.</p>
-<p>In this example, the snapshots are the same as the AGIX holders, to focus on developing the calculations first, leaving getting the data from the database for later on.</p>
+<p>In this example, the snapshots are the same as the AGIX holders, with some accounts removed manually in the first snapshot, to focus on developing the calculations first, leaving getting the data from the database or CSV files for later on.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">lp_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/lp&#39;</span><span class="p">)</span>
@@ -13254,7 +13272,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
@@ -13289,7 +13307,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">agi_snapshots_raw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
@@ -13333,7 +13351,7 @@ Name: 7738, dtype: object
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">):</span>
@@ -13383,9 +13401,14 @@ Name: 0, dtype: object
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="2.-Calculate-eligibility">2. Calculate eligibility<a class="anchor-link" href="#2.-Calculate-eligibility">&#182;</a></h2><p>With the snapshot data ready, we can start to calculate the eligible addresses.</p>
-<p>Note that the following is intended to illustrate the process, but with the actual dataset of snapshots, a similar but more complex processing would be applied.</p>
-<p>Additionally, for the sake of the example, this process will only take into account holders, ignoring stakers and liquidity providers.</p>
-<p>Nonetheless, it's feasible to adapt this same series of steps to stakers and liquidity providers, by preparing their respective datasets as described in step 1.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Portal-Registration">Portal Registration<a class="anchor-link" href="#Portal-Registration">&#182;</a></h3><p>At this point, the snapshots can be filtered by the set of addresses that have registered in the airdrop portal for a given month.</p>
 
 </div>
 </div>
@@ -13402,7 +13425,7 @@ Name: 0, dtype: object
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AGI Snapshots: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">))</span>
@@ -13490,7 +13513,7 @@ Name: 16367, dtype: object
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Merge snapshots</span>
@@ -13512,7 +13535,7 @@ Name: 16367, dtype: object
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">filter_addresses</span><span class="p">(</span><span class="n">initial_df</span><span class="p">,</span> <span class="n">snapshot_df</span><span class="p">):</span>
@@ -13577,22 +13600,22 @@ Initial Eligible Addresses (holders): 16368
 
 Snapshot #0
 Eligible Addresses from snapshot: 16368 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 16368/16368 [00:24&lt;00:00, 679.14it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 16368/16368 [00:22&lt;00:00, 728.96it/s]
 Eligible Addresses: 16368
 
 Snapshot #1
 Eligible Addresses from snapshot: 16470 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15421/15421 [00:22&lt;00:00, 695.08it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15421/15421 [00:21&lt;00:00, 730.55it/s]
 Eligible Addresses: 15421
 
 Snapshot #2
 Eligible Addresses from snapshot: 16470 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15402/15402 [00:22&lt;00:00, 698.45it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15402/15402 [00:21&lt;00:00, 725.19it/s]
 Eligible Addresses: 15402
 
 Snapshot #3
 Eligible Addresses from snapshot: 16473 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15400/15400 [00:22&lt;00:00, 692.56it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15400/15400 [00:21&lt;00:00, 724.26it/s]
 Eligible Addresses: 15400
 
 Total Eligible Addresses (holders): 15400
@@ -13601,17 +13624,17 @@ Initial Eligible Addresses (LP): 111
 
 Snapshot #0
 Eligible Addresses from snapshot: 111 addresses
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 111/111 [00:00&lt;00:00, 2176.58it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 111/111 [00:00&lt;00:00, 2176.23it/s]
 Eligible Addresses: 111
 
 Snapshot #1
 Eligible Addresses from snapshot: 16470 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 109/109 [00:00&lt;00:00, 681.25it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 109/109 [00:00&lt;00:00, 703.15it/s]
 Eligible Addresses: 109
 
 Snapshot #2
 Eligible Addresses from snapshot: 16473 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 109/109 [00:00&lt;00:00, 694.28it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 109/109 [00:00&lt;00:00, 707.72it/s]
 Eligible Addresses: 109
 
 Total Eligible Addresses (LP): 109
@@ -13620,17 +13643,17 @@ Initial Eligible Addresses (stakers): 946
 
 Snapshot #0
 Eligible Addresses from snapshot: 946 addresses
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 946/946 [00:00&lt;00:00, 1942.51it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 946/946 [00:00&lt;00:00, 1978.89it/s]
 Eligible Addresses: 946
 
 Snapshot #1
 Eligible Addresses from snapshot: 16470 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 946/946 [00:01&lt;00:00, 696.61it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 946/946 [00:01&lt;00:00, 651.90it/s]
 Eligible Addresses: 946
 
 Snapshot #2
 Eligible Addresses from snapshot: 16473 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 945/945 [00:01&lt;00:00, 694.34it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 945/945 [00:01&lt;00:00, 648.49it/s]
 Eligible Addresses: 945
 
 Total Eligible Addresses (stakers): 945
@@ -13645,7 +13668,7 @@ Total Eligible Addresses (stakers): 945
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Calculating-airdrop-amount">Calculating airdrop amount<a class="anchor-link" href="#Calculating-airdrop-amount">&#182;</a></h3>
+<h2 id="3.-Calculating-airdrop-rewards">3. Calculating airdrop rewards<a class="anchor-link" href="#3.-Calculating-airdrop-rewards">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -13660,7 +13683,7 @@ Total Eligible Addresses (stakers): 945
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">datasets_dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -13735,7 +13758,7 @@ Total Eligible Addresses (stakers): 945
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Eligible Stakers: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
@@ -13959,7 +13982,7 @@ Calculated reward (stakers, total): 550000.0
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span>
@@ -13988,15 +14011,15 @@ Calculated reward (stakers, total): 550000.0
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 Appending &#34;staker_reward_per_user&#34; column to final file
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2726.46it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2783.76it/s]
 
 
 Appending &#34;staker_reward_per_stake&#34; column to final file
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2726.69it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2786.59it/s]
 
 
 Appending &#34;used_staker_balance&#34; column to final file
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2725.95it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2779.96it/s]
 
 </pre>
 </div>
@@ -14138,8 +14161,7 @@ Appending &#34;used_staker_balance&#34; column to final file
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Holders-and-LP">Holders and LP<a class="anchor-link" href="#Holders-and-LP">&#182;</a></h4><p>Knowing the eligibility of the addresses, we can calculate the balances now using the following formula.</p>
-<p>With those premises in place, we can calculate the final reward for each user by using the following formula</p>
+<h4 id="Holders-and-LP">Holders and LP<a class="anchor-link" href="#Holders-and-LP">&#182;</a></h4><p>Knowing the eligibility of the addresses, we can calculate the rewards for each user using the following formula.</p>
 <p><code>Reward = total_reward * log10(1+user_balance) / SUM(log10(1+user_balance))</code></p>
 
 </div>
@@ -14147,7 +14169,7 @@ Appending &#34;used_staker_balance&#34; column to final file
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define SUM(log10(1+user_balance)) as a constant variable</span>
@@ -14201,7 +14223,7 @@ Appending &#34;used_staker_balance&#34; column to final file
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Verify that the total amount of allocated reward matches the expected value</span>
@@ -14250,7 +14272,7 @@ Calculated reward (holders and LP): 825000.0
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Add rewards to final data frame</span>
@@ -14300,19 +14322,19 @@ Calculated reward (holders and LP): 825000.0
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 Appending &#34;holder_reward&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:20&lt;00:00, 745.47it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:19&lt;00:00, 775.66it/s]
 
 
 Appending &#34;used_holder_balance&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:20&lt;00:00, 743.67it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:19&lt;00:00, 773.67it/s]
 
 
 Appending &#34;lp_reward&#34; column to final file
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3268.71it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3295.14it/s]
 
 
 Appending &#34;used_lp_balance&#34; column to final file
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3264.56it/s]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3294.69it/s]
 
 
 Allocated reward (stakers, holders and LP): 1375000.0
