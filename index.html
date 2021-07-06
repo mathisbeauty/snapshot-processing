@@ -13099,7 +13099,18 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Reward parameters</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Partial calculations</span>
+
+<span class="n">CALCULATE_STAKERS</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">CALCULATE_HOLDERS_AND_LP</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="c1"># Reward parameters</span>
+
+<span class="c1"># Due to floating point calculations, logarightms and divisions, a very small error rate it&#39;s very hard to avoid</span>
+<span class="c1"># This variable sets the error tolerance for the calculations in SDAO</span>
+<span class="n">MAXIMUM_ERROR_SDAO</span> <span class="o">=</span> <span class="mf">0.000000001</span>
 
 <span class="n">TOTAL_STAKING_REWARD</span> <span class="o">=</span> <span class="mi">550000</span>
 
@@ -13255,9 +13266,29 @@ div#notebook {
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">lp_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/lp&#39;</span><span class="p">)</span>
 
 <span class="n">stakers_snapshots_files</span> <span class="o">=</span> <span class="n">get_snapshots</span><span class="p">(</span><span class="s1">&#39;../data/stakers&#39;</span><span class="p">)</span>
+
+<span class="n">pprint</span><span class="p">(</span><span class="n">stakers_snapshots_files</span><span class="p">)</span>
 </pre></div>
 
     </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;13.csv&#39;, &#39;14.csv&#39;, &#39;15.csv&#39;]
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -13275,7 +13306,8 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Expects a CSV generated from Etherscan</span>
+<span class="k">def</span> <span class="nf">read_etherscan_csv</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
     <span class="c1"># Read csv file</span>
     <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;../data/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
     <span class="c1"># Sort accounts by holding amount, larger holders at the top</span>
@@ -13284,11 +13316,20 @@ div#notebook {
     <span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;Balance&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data_frame</span>
 
-<span class="n">agi_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;holders&quot;</span><span class="p">,</span> <span class="s2">&quot;agi/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">agi_snapshots_files</span><span class="p">]</span>
-<span class="n">agix_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;holders&quot;</span><span class="p">,</span> <span class="s2">&quot;agix/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">agix_snapshots_files</span><span class="p">]</span>
+<span class="c1"># Expects a file with two columns, &quot;address&quot; and &quot;balance&quot;. Balance it&#39;s in the smallest unit, Cogs (8 decimals)</span>
+<span class="k">def</span> <span class="nf">read_simple_csv</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+    <span class="c1"># Read csv file</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;../data/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+    <span class="c1"># Sort accounts by holding amount, larger holders at the top</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">data_frame</span>
 
-<span class="n">lp_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;lp&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">lp_snapshots_files</span><span class="p">]</span>
-<span class="n">stakers_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;stakers&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">stakers_snapshots_files</span><span class="p">]</span>
+<span class="n">agi_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_etherscan_csv</span><span class="p">(</span><span class="s2">&quot;holders&quot;</span><span class="p">,</span> <span class="s2">&quot;agi/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">agi_snapshots_files</span><span class="p">]</span>
+<span class="n">agix_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_etherscan_csv</span><span class="p">(</span><span class="s2">&quot;holders&quot;</span><span class="p">,</span> <span class="s2">&quot;agix/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">agix_snapshots_files</span><span class="p">]</span>
+
+<span class="n">lp_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_etherscan_csv</span><span class="p">(</span><span class="s2">&quot;lp&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">lp_snapshots_files</span><span class="p">]</span>
+<span class="n">stakers_snapshots_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_simple_csv</span><span class="p">(</span><span class="s2">&quot;stakers&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">stakers_snapshots_files</span><span class="p">]</span>
 </pre></div>
 
     </div>
@@ -13364,7 +13405,7 @@ Name: 7738, dtype: object
 <span class="n">agix_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">agix_snapshots_raw</span><span class="p">]</span>
 
 <span class="n">lp_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">lp_snapshots_raw</span><span class="p">]</span>
-<span class="n">stakers_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">stakers_snapshots_raw</span><span class="p">]</span>
+<span class="n">stakers_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">stakers_snapshots_raw</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 <span class="c1"># Address and balance from the account with the largest holding, one of the Binance wallets</span>
@@ -13448,7 +13489,7 @@ Name: 0, dtype: object
 <span class="n">eligible_addresses_holders</span> <span class="o">=</span> <span class="n">get_initial</span><span class="p">(</span><span class="n">agi_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;holders&#39;</span><span class="p">)</span>
 <span class="n">eligible_addresses_lp</span> <span class="o">=</span> <span class="n">get_initial</span><span class="p">(</span><span class="n">lp_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;LP&#39;</span><span class="p">)</span>
 <span class="n">eligible_addresses_stakers</span> <span class="o">=</span> <span class="n">get_initial</span><span class="p">(</span><span class="n">stakers_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;stakers&#39;</span><span class="p">)</span>
-
+<span class="n">display</span><span class="p">(</span><span class="n">stakers_snapshots</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">()</span>
 <span class="c1"># Print address with smaller eligible balance</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -13479,10 +13520,113 @@ Eligible Addresses (holders): 16368
 Total Addresses (LP): 189
 Eligible Addresses (LP): 111
 
-Total Addresses (stakers): 1405
-Eligible Addresses (stakers): 946
+Total Addresses (stakers): 925
+Eligible Addresses (stakers): 869
+
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
 
 
+
+<div class="output_html rendered_html output_subarea ">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>address</th>
+      <th>balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0xccBcC956adee7896BC6c5aa87a6d09383edAcd55</td>
+      <td>1709362168430811</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0xA842B1bd65c1F70cb5d4d3FC9937884b41BF8FB5</td>
+      <td>322650700000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0x4DfA40d7a1cCb588985Cf077e6022D33DF8A6d4F</td>
+      <td>189065197065379</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0x5cE9e731311a6b9A9BF26efB5Ff425750FEAcC13</td>
+      <td>143944037115000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0x672E1AcF64DE8836341ba7c2d7d0007ed854037F</td>
+      <td>119750163772906</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>920</th>
+      <td>0x87aba2141AA7f625e71c548295e4DBcBBCf0aA14</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>921</th>
+      <td>0xEcf76E6901832b280502Aa051b60536d0368Dd39</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>922</th>
+      <td>0xa15837cbd4c9C401C786b0Bde837DCf259AFf472</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>923</th>
+      <td>0x6C09FAf507dae86EcA2e88a36fA50EC8bdA9175e</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>924</th>
+      <td>0x91d95dAb36e4c71B13394153C98087279dAD9F3f</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>925 rows × 2 columns</p>
+</div>
+</div>
+
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
 address    0x4c4ca064972ff8ff64568319c92367c159c52238
 balance                                  100000000000
 Name: 16367, dtype: object
@@ -13575,10 +13719,11 @@ Name: 16367, dtype: object
     
     <span class="k">return</span> <span class="n">eligible_df</span>
     
-
-<span class="n">eligible_addresses_holders</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="p">,</span> <span class="n">holders_snapshots</span><span class="p">,</span> <span class="s1">&#39;holders&#39;</span><span class="p">)</span>
-<span class="n">eligible_addresses_lp</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_lp</span><span class="p">,</span> <span class="n">lp_snapshots</span><span class="p">,</span> <span class="s1">&#39;LP&#39;</span><span class="p">)</span>
-<span class="n">eligible_addresses_stakers</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="p">,</span> <span class="n">stakers_snapshots</span><span class="p">,</span> <span class="s1">&#39;stakers&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">CALCULATE_HOLDERS_AND_LP</span><span class="p">:</span>
+    <span class="n">eligible_addresses_holders</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_holders</span><span class="p">,</span> <span class="n">holders_snapshots</span><span class="p">,</span> <span class="s1">&#39;holders&#39;</span><span class="p">)</span>
+    <span class="n">eligible_addresses_lp</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_lp</span><span class="p">,</span> <span class="n">lp_snapshots</span><span class="p">,</span> <span class="s1">&#39;LP&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">CALCULATE_STAKERS</span><span class="p">:</span>
+    <span class="n">eligible_addresses_stakers</span> <span class="o">=</span> <span class="n">get_eligible</span><span class="p">(</span><span class="n">eligible_addresses_stakers</span><span class="p">,</span> <span class="n">stakers_snapshots</span><span class="p">,</span> <span class="s1">&#39;stakers&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13596,67 +13741,24 @@ Name: 16367, dtype: object
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-Initial Eligible Addresses (holders): 16368
+Initial Eligible Addresses (stakers): 869
 
 Snapshot #0
-Eligible Addresses from snapshot: 16368 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 16368/16368 [00:22&lt;00:00, 728.96it/s]
-Eligible Addresses: 16368
+Eligible Addresses from snapshot: 869 addresses
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 869/869 [00:00&lt;00:00, 1970.60it/s]
+Eligible Addresses: 869
 
 Snapshot #1
-Eligible Addresses from snapshot: 16470 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15421/15421 [00:21&lt;00:00, 730.55it/s]
-Eligible Addresses: 15421
+Eligible Addresses from snapshot: 1099 addresses
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 868/868 [00:00&lt;00:00, 1891.07it/s]
+Eligible Addresses: 868
 
 Snapshot #2
-Eligible Addresses from snapshot: 16470 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15402/15402 [00:21&lt;00:00, 725.19it/s]
-Eligible Addresses: 15402
+Eligible Addresses from snapshot: 1365 addresses
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 850/850 [00:00&lt;00:00, 1845.68it/s]
+Eligible Addresses: 850
 
-Snapshot #3
-Eligible Addresses from snapshot: 16473 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15400/15400 [00:21&lt;00:00, 724.26it/s]
-Eligible Addresses: 15400
-
-Total Eligible Addresses (holders): 15400
-
-Initial Eligible Addresses (LP): 111
-
-Snapshot #0
-Eligible Addresses from snapshot: 111 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 111/111 [00:00&lt;00:00, 2176.23it/s]
-Eligible Addresses: 111
-
-Snapshot #1
-Eligible Addresses from snapshot: 16470 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 109/109 [00:00&lt;00:00, 703.15it/s]
-Eligible Addresses: 109
-
-Snapshot #2
-Eligible Addresses from snapshot: 16473 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 109/109 [00:00&lt;00:00, 707.72it/s]
-Eligible Addresses: 109
-
-Total Eligible Addresses (LP): 109
-
-Initial Eligible Addresses (stakers): 946
-
-Snapshot #0
-Eligible Addresses from snapshot: 946 addresses
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 946/946 [00:00&lt;00:00, 1978.89it/s]
-Eligible Addresses: 946
-
-Snapshot #1
-Eligible Addresses from snapshot: 16470 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 946/946 [00:01&lt;00:00, 651.90it/s]
-Eligible Addresses: 946
-
-Snapshot #2
-Eligible Addresses from snapshot: 16473 addresses
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 945/945 [00:01&lt;00:00, 648.49it/s]
-Eligible Addresses: 945
-
-Total Eligible Addresses (stakers): 945
+Total Eligible Addresses (stakers): 850
 </pre>
 </div>
 </div>
@@ -13735,7 +13837,7 @@ Total Eligible Addresses (stakers): 945
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Total addresses participating in the airdrop: 15466
+<pre>Total addresses participating in the airdrop: 17224
 </pre>
 </div>
 </div>
@@ -13781,7 +13883,9 @@ Total Eligible Addresses (stakers): 945
 
 <span class="n">total_stake</span> <span class="o">=</span> <span class="n">eligible_addresses_stakers</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-<span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rewards_stakers_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">half_staking_reward</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">total_stake</span><span class="p">)</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rewards_stakers_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">half_staking_reward</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">total_stake</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
 
 <span class="n">display</span><span class="p">(</span><span class="n">rewards_stakers_df</span><span class="p">)</span>
 
@@ -13802,11 +13906,11 @@ Total Eligible Addresses (stakers): 945
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (stakers, total): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">calculated_staker_reward_per_user</span> <span class="o">+</span> <span class="n">calculated_staker_reward_per_stake</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">()</span>
 
-<span class="n">per_user_error</span> <span class="o">=</span> <span class="n">calculated_staker_reward_per_user</span> <span class="o">!=</span> <span class="n">adjusted_half_staker_reward</span>
+<span class="n">per_user_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">calculated_staker_reward_per_user</span> <span class="o">-</span> <span class="n">adjusted_half_staker_reward</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_ERROR_SDAO</span>
 
-<span class="n">per_stake_error</span> <span class="o">=</span> <span class="n">calculated_staker_reward_per_stake</span> <span class="o">!=</span> <span class="n">adjusted_half_staker_reward</span>
+<span class="n">per_stake_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">calculated_staker_reward_per_stake</span> <span class="o">-</span> <span class="n">adjusted_half_staker_reward</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_ERROR_SDAO</span>
 
-<span class="n">total_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">calculated_staker_reward_per_user</span> <span class="o">+</span> <span class="n">calculated_staker_reward_per_stake</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">adjusted_half_staker_reward</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">total_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">calculated_staker_reward_per_user</span> <span class="o">+</span> <span class="n">calculated_staker_reward_per_stake</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">adjusted_half_staker_reward</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_ERROR_SDAO</span>
 
 <span class="k">if</span> <span class="n">per_user_error</span> <span class="ow">or</span> <span class="n">per_stake_error</span> <span class="ow">or</span> <span class="n">total_error</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error calculating rewards (stakers)&#39;</span><span class="p">,</span> <span class="s1">&#39;final reward sum does not match allocated reward&#39;</span><span class="p">)</span>
@@ -13826,8 +13930,8 @@ Total Eligible Addresses (stakers): 945
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Total Eligible Stakers: 945
-Staking reward per user: 291.005291005291
+<pre>Total Eligible Stakers: 850
+Staking reward per user: 323.5294117647059
 </pre>
 </div>
 </div>
@@ -13866,38 +13970,38 @@ Staking reward per user: 291.005291005291
   <tbody>
     <tr>
       <th>0</th>
-      <td>0x0c14e2eecf6e8fc9042b91ced084ea0d7b9360de</td>
-      <td>646999100000000</td>
-      <td>291.005291</td>
-      <td>54438.750011</td>
+      <td>0xccBcC956adee7896BC6c5aa87a6d09383edAcd55</td>
+      <td>1709362168430811</td>
+      <td>323.529412</td>
+      <td>53242.640315</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0x07037fe3212eb56476d28fd0baaa4d1298cf571e</td>
-      <td>394814700000000</td>
-      <td>291.005291</td>
-      <td>33219.858812</td>
+      <td>0xA842B1bd65c1F70cb5d4d3FC9937884b41BF8FB5</td>
+      <td>322650700000000</td>
+      <td>323.529412</td>
+      <td>10049.815940</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0x09363887a4096b142f3f6b58a7eed2f1a0ff7343</td>
-      <td>142742800000000</td>
-      <td>291.005291</td>
-      <td>12010.433407</td>
+      <td>0x4DfA40d7a1cCb588985Cf077e6022D33DF8A6d4F</td>
+      <td>189065197065379</td>
+      <td>323.529412</td>
+      <td>5888.939436</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0x09ade54ba605dde33fd467ae0e05cdd64dafbc55</td>
-      <td>104879800000000</td>
-      <td>291.005291</td>
-      <td>8824.626206</td>
+      <td>0x5cE9e731311a6b9A9BF26efB5Ff425750FEAcC13</td>
+      <td>143944037115000</td>
+      <td>323.529412</td>
+      <td>4483.520658</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0x0181a709e165195bd67651bb5304b4cab6e0ada2</td>
-      <td>70000000000000</td>
-      <td>291.005291</td>
-      <td>5889.826587</td>
+      <td>0x672E1AcF64DE8836341ba7c2d7d0007ed854037F</td>
+      <td>119750163772906</td>
+      <td>323.529412</td>
+      <td>3729.937994</td>
     </tr>
     <tr>
       <th>...</th>
@@ -13907,43 +14011,43 @@ Staking reward per user: 291.005291005291
       <td>...</td>
     </tr>
     <tr>
-      <th>941</th>
-      <td>0x06230a286bd4ce2305640b4052fb8c8c64a9d2f2</td>
-      <td>100000000000</td>
-      <td>291.005291</td>
-      <td>8.414038</td>
+      <th>864</th>
+      <td>0x6b99e90eaAE277d9b3Fe510A8C05225BD48d278c</td>
+      <td>100300000000</td>
+      <td>323.529412</td>
+      <td>3.124111</td>
     </tr>
     <tr>
-      <th>942</th>
-      <td>0x0491e6133cc25a5debe5f44b782282ea64c2d8e5</td>
-      <td>100000000000</td>
-      <td>291.005291</td>
-      <td>8.414038</td>
+      <th>865</th>
+      <td>0xAc77ABfe5986DB857FeC62a7B689F6681F6F50B9</td>
+      <td>100050000000</td>
+      <td>323.529412</td>
+      <td>3.116324</td>
     </tr>
     <tr>
-      <th>943</th>
-      <td>0x001c46ba3a0d7f09302961f4811dc0521c0c3545</td>
+      <th>866</th>
+      <td>0x3d95D4A6DbaE0Cd0643a82b13A13b08921D6ADf7</td>
       <td>100000000000</td>
-      <td>291.005291</td>
-      <td>8.414038</td>
+      <td>323.529412</td>
+      <td>3.114767</td>
     </tr>
     <tr>
-      <th>944</th>
-      <td>0x09a3741d22e8091a00d8041a92e7501bd069b517</td>
+      <th>867</th>
+      <td>0x09CE76119D3c8c9577B2d357D92e9390B7a62082</td>
       <td>100000000000</td>
-      <td>291.005291</td>
-      <td>8.414038</td>
+      <td>323.529412</td>
+      <td>3.114767</td>
     </tr>
     <tr>
-      <th>945</th>
-      <td>0x0048a27710c2714b038186d055dd514688d8f707</td>
+      <th>868</th>
+      <td>0xc372A93d067480808F267f173D0fa30F8fa32A18</td>
       <td>100000000000</td>
-      <td>291.005291</td>
-      <td>8.414038</td>
+      <td>323.529412</td>
+      <td>3.114767</td>
     </tr>
   </tbody>
 </table>
-<p>945 rows × 4 columns</p>
+<p>850 rows × 4 columns</p>
 </div>
 </div>
 
@@ -13960,7 +14064,7 @@ Allocated reward (stakers, per user): 275000.0
 Calculated reward (stakers, per user): 275000.0
 
 Allocated reward (stakers, per stake): 275000.0
-Calculated reward (stakers, per stake): 275000.0
+Calculated reward (stakers, per stake): 274999.99999999994
 
 Allocated reward (stakers, total): 550000.0
 Calculated reward (stakers, total): 550000.0
@@ -13987,10 +14091,11 @@ Calculated reward (stakers, total): 550000.0
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">rewards_stakers_df</span><span class="p">[</span><span class="s1">&#39;balance&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="n">CONVERT_TO_FULL_BALANCE_AGI</span>
 
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">)</span>
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">)</span>
-<span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span>
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_staker_balance&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">CALCULATE_STAKERS</span><span class="p">:</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">)</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">)</span>
+    <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">rewards_stakers_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_staker_balance&#39;</span><span class="p">)</span>
 
 <span class="n">display</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">)</span>
 </pre></div>
@@ -14011,15 +14116,15 @@ Calculated reward (stakers, total): 550000.0
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 Appending &#34;staker_reward_per_user&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2783.76it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 17224/17224 [00:06&lt;00:00, 2645.42it/s]
 
 
 Appending &#34;staker_reward_per_stake&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2786.59it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 17224/17224 [00:06&lt;00:00, 2659.28it/s]
 
 
 Appending &#34;used_staker_balance&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:05&lt;00:00, 2779.96it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 17224/17224 [00:06&lt;00:00, 2679.04it/s]
 
 </pre>
 </div>
@@ -14076,7 +14181,7 @@ Appending &#34;used_staker_balance&#34; column to final file
     </tr>
     <tr>
       <th>2</th>
-      <td>0xa1d8d972560c2f8144af871db508f0b0b10a3fbf</td>
+      <td>0x3c9d954a5e9fff8a3b9495094adee9b5c2233e5c</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -14084,7 +14189,7 @@ Appending &#34;used_staker_balance&#34; column to final file
     </tr>
     <tr>
       <th>3</th>
-      <td>0x19184ab45c40c2920b0e0e31413b9434abd243ed</td>
+      <td>0x3b1355599a89a554ffa37fa9ed508f208a271aa9</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -14092,7 +14197,7 @@ Appending &#34;used_staker_balance&#34; column to final file
     </tr>
     <tr>
       <th>4</th>
-      <td>0x8699b0ffff9136df5fed0175baf4b65477378a3d</td>
+      <td>0xa1d8d972560c2f8144af871db508f0b0b10a3fbf</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -14107,48 +14212,48 @@ Appending &#34;used_staker_balance&#34; column to final file
       <td>...</td>
     </tr>
     <tr>
-      <th>15461</th>
-      <td>0x00ea21e18daad781dfa97130e09c6e41c007dbbd</td>
-      <td>291.005291</td>
-      <td>9.221786</td>
-      <td>300.227077</td>
-      <td>1096.0</td>
+      <th>17219</th>
+      <td>0x6b99e90eaAE277d9b3Fe510A8C05225BD48d278c</td>
+      <td>323.529412</td>
+      <td>3.124111</td>
+      <td>326.653523</td>
+      <td>1003.0</td>
     </tr>
     <tr>
-      <th>15462</th>
-      <td>0x0a97a90e73af39c1819bafe9fc8846573d055ab1</td>
-      <td>291.005291</td>
-      <td>9.146059</td>
-      <td>300.151350</td>
-      <td>1087.0</td>
+      <th>17220</th>
+      <td>0xAc77ABfe5986DB857FeC62a7B689F6681F6F50B9</td>
+      <td>323.529412</td>
+      <td>3.116324</td>
+      <td>326.645736</td>
+      <td>1000.5</td>
     </tr>
     <tr>
-      <th>15463</th>
-      <td>0x0e5767bc10e638fa27475046e9edba581ed92dcf</td>
-      <td>291.005291</td>
-      <td>8.986193</td>
-      <td>299.991484</td>
-      <td>1068.0</td>
+      <th>17221</th>
+      <td>0x3d95D4A6DbaE0Cd0643a82b13A13b08921D6ADf7</td>
+      <td>323.529412</td>
+      <td>3.114767</td>
+      <td>326.644178</td>
+      <td>1000.0</td>
     </tr>
     <tr>
-      <th>15464</th>
-      <td>0x0024b5903f0eb068e77f3e796bd2edea926c26e5</td>
-      <td>291.005291</td>
-      <td>8.498178</td>
-      <td>299.503469</td>
-      <td>1010.0</td>
+      <th>17222</th>
+      <td>0x09CE76119D3c8c9577B2d357D92e9390B7a62082</td>
+      <td>323.529412</td>
+      <td>3.114767</td>
+      <td>326.644178</td>
+      <td>1000.0</td>
     </tr>
     <tr>
-      <th>15465</th>
-      <td>0x0b6010d0985ea30a99bd00a858724ed3896222fb</td>
-      <td>291.005291</td>
-      <td>8.447694</td>
-      <td>299.452985</td>
-      <td>1004.0</td>
+      <th>17223</th>
+      <td>0xc372A93d067480808F267f173D0fa30F8fa32A18</td>
+      <td>323.529412</td>
+      <td>3.114767</td>
+      <td>326.644178</td>
+      <td>1000.0</td>
     </tr>
   </tbody>
 </table>
-<p>15466 rows × 5 columns</p>
+<p>17224 rows × 5 columns</p>
 </div>
 </div>
 
@@ -14186,7 +14291,6 @@ Appending &#34;used_staker_balance&#34; column to final file
 
 <span class="k">def</span> <span class="nf">calculate_reward</span><span class="p">(</span><span class="n">total_reward</span><span class="p">,</span> <span class="n">user_balance_index</span><span class="p">):</span>
     <span class="n">user_balance_log10</span> <span class="o">=</span> <span class="n">balances_log10</span><span class="p">[</span><span class="n">user_balance_index</span><span class="p">]</span>
-    <span class="n">reward_percentage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">user_balance_log10</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">sum_balances_log10</span><span class="p">)</span>
     <span class="c1"># Calculate reward and convert to final balance</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">total_reward</span> <span class="o">*</span> <span class="n">user_balance_log10</span> <span class="o">/</span> <span class="n">sum_balances_log10</span><span class="p">)</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
 
@@ -14235,7 +14339,7 @@ Appending &#34;used_staker_balance&#34; column to final file
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">adjusted_total_reward</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">calculated_reward</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="n">calculated_reward</span> <span class="o">!=</span> <span class="n">adjusted_total_reward</span><span class="p">:</span>
+<span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">calculated_reward</span> <span class="o">-</span> <span class="n">adjusted_total_reward</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_ERROR_SDAO</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error calculating rewards&#39;</span><span class="p">,</span> <span class="s1">&#39;final reward sum does not match allocated reward&#39;</span><span class="p">)</span>
 </pre></div>
 
@@ -14254,7 +14358,7 @@ Appending &#34;used_staker_balance&#34; column to final file
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Allocated reward (holders and LP): 825000.0
-Calculated reward (holders and LP): 825000.0
+Calculated reward (holders and LP): 824999.9999999999
 </pre>
 </div>
 </div>
@@ -14277,19 +14381,34 @@ Calculated reward (holders and LP): 825000.0
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Add rewards to final data frame</span>
 
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">holder_rewards_df</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="s1">&#39;holder_reward&#39;</span><span class="p">)</span>
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">holder_rewards_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_holder_balance&#39;</span><span class="p">)</span>
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">lp_rewards_df</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="s1">&#39;lp_reward&#39;</span><span class="p">)</span>
-<span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">lp_rewards_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_lp_balance&#39;</span><span class="p">)</span>
-<span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;holder_reward&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;lp_reward&#39;</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">CALCULATE_HOLDERS_AND_LP</span><span class="p">:</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">holder_rewards_df</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="s1">&#39;holder_reward&#39;</span><span class="p">)</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">holder_rewards_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_holder_balance&#39;</span><span class="p">)</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">lp_rewards_df</span><span class="p">,</span> <span class="s1">&#39;reward&#39;</span><span class="p">,</span> <span class="s1">&#39;lp_reward&#39;</span><span class="p">)</span>
+    <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">append_column_by_address</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">,</span> <span class="n">lp_rewards_df</span><span class="p">,</span> <span class="s1">&#39;balance&#39;</span><span class="p">,</span> <span class="s1">&#39;used_lp_balance&#39;</span><span class="p">)</span>
 
-<span class="n">total_calculated_reward</span> <span class="o">=</span> <span class="p">(</span><span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-<span class="k">if</span> <span class="n">total_calculated_reward</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">(</span><span class="n">TOTAL_REWARD</span> <span class="o">+</span> <span class="n">TOTAL_STAKING_REWARD</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total rounding error: </span><span class="si">%s</span><span class="s1"> SDAO&#39;</span> <span class="o">%</span> <span class="s1">&#39;</span><span class="si">{:.18f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">TOTAL_REWARD</span> <span class="o">+</span> <span class="n">TOTAL_STAKING_REWARD</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+<span class="k">if</span> <span class="n">CALCULATE_HOLDERS_AND_LP</span><span class="p">:</span>
+    <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;holder_reward&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;lp_reward&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="n">CALCULATE_STAKERS</span><span class="p">:</span>
+    <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_user&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;staker_reward_per_stake&#39;</span><span class="p">]</span>
+
+<span class="n">total_calculated_reward</span> <span class="o">=</span> <span class="p">(</span><span class="n">addresses_df</span><span class="p">[</span><span class="s1">&#39;total_reward&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="n">expected_reward</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">if</span> <span class="n">CALCULATE_HOLDERS_AND_LP</span><span class="p">:</span>
+    <span class="n">expected_reward</span> <span class="o">=</span> <span class="n">TOTAL_REWARD</span>
+
+<span class="k">if</span> <span class="n">CALCULATE_STAKERS</span><span class="p">:</span>
+    <span class="n">expected_reward</span> <span class="o">+=</span> <span class="n">TOTAL_STAKING_REWARD</span>
+
+<span class="n">expected_reward</span> <span class="o">/=</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
+
+<span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">total_calculated_reward</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">expected_reward</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_ERROR_SDAO</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total rounding error: </span><span class="si">%s</span><span class="s1"> SDAO&#39;</span> <span class="o">%</span> <span class="s1">&#39;</span><span class="si">{:.18f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">total_calculated_reward</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">expected_reward</span><span class="p">))))</span>
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error calculating rewards&#39;</span><span class="p">,</span> <span class="s1">&#39;final reward sum does not match allocated reward&#39;</span><span class="p">)</span>
-
-<span class="n">total_calculated_reward</span> <span class="o">/=</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span>
 
 <span class="c1"># Sort addresses by total reward (descending) and recalculate indexes</span>
 
@@ -14297,13 +14416,15 @@ Calculated reward (holders and LP): 825000.0
 <span class="n">addresses_df</span> <span class="o">=</span> <span class="n">addresses_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (stakers, holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">TOTAL_REWARD</span> <span class="o">+</span> <span class="n">TOTAL_STAKING_REWARD</span><span class="p">)</span> <span class="o">/</span> <span class="n">CONVERT_TO_FULL_BALANCE_SDAO</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Allocated reward (stakers, holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">expected_reward</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated reward (stakers, holders and LP): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_calculated_reward</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Final rewards&#39;</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">addresses_df</span><span class="p">)</span>
+
+<span class="n">addresses_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;../rewards/rewards-stakers.csv&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14321,24 +14442,8 @@ Calculated reward (holders and LP): 825000.0
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-Appending &#34;holder_reward&#34; column to final file
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:19&lt;00:00, 775.66it/s]
-
-
-Appending &#34;used_holder_balance&#34; column to final file
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:19&lt;00:00, 773.67it/s]
-
-
-Appending &#34;lp_reward&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3295.14it/s]
-
-
-Appending &#34;used_lp_balance&#34; column to final file
-100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15466/15466 [00:04&lt;00:00, 3294.69it/s]
-
-
-Allocated reward (stakers, holders and LP): 1375000.0
-Calculated reward (stakers, holders and LP): 1375000.0
+Allocated reward (stakers, holders and LP): 550000.0
+Calculated reward (stakers, holders and LP): 550000.0
 
 
 Final rewards
@@ -14376,78 +14481,54 @@ Final rewards
       <th>staker_reward_per_stake</th>
       <th>staker_reward</th>
       <th>used_staker_balance</th>
-      <th>holder_reward</th>
-      <th>used_holder_balance</th>
-      <th>lp_reward</th>
-      <th>used_lp_balance</th>
       <th>total_reward</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0x0c14e2eecf6e8fc9042b91ced084ea0d7b9360de</td>
-      <td>291.005291</td>
-      <td>54438.750011</td>
-      <td>54729.755302</td>
-      <td>6469991.0</td>
-      <td>67.039075</td>
-      <td>6469991.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>54796.794376</td>
+      <td>0xccBcC956adee7896BC6c5aa87a6d09383edAcd55</td>
+      <td>323.529412</td>
+      <td>53242.640315</td>
+      <td>53566.169727</td>
+      <td>1.709362e+07</td>
+      <td>53566.169727</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0x07037fe3212eb56476d28fd0baaa4d1298cf571e</td>
-      <td>291.005291</td>
-      <td>33219.858812</td>
-      <td>33510.864103</td>
-      <td>3948147.0</td>
-      <td>66.068130</td>
-      <td>3948147.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>33576.932233</td>
+      <td>0xA842B1bd65c1F70cb5d4d3FC9937884b41BF8FB5</td>
+      <td>323.529412</td>
+      <td>10049.815940</td>
+      <td>10373.345352</td>
+      <td>3.226507e+06</td>
+      <td>10373.345352</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0x09363887a4096b142f3f6b58a7eed2f1a0ff7343</td>
-      <td>291.005291</td>
-      <td>12010.433407</td>
-      <td>12301.438698</td>
-      <td>1427428.0</td>
-      <td>62.467822</td>
-      <td>632382.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>12363.906520</td>
+      <td>0x4DfA40d7a1cCb588985Cf077e6022D33DF8A6d4F</td>
+      <td>323.529412</td>
+      <td>5888.939436</td>
+      <td>6212.468847</td>
+      <td>1.890652e+06</td>
+      <td>6212.468847</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0x09ade54ba605dde33fd467ae0e05cdd64dafbc55</td>
-      <td>291.005291</td>
-      <td>8824.626206</td>
-      <td>9115.631497</td>
-      <td>1048798.0</td>
-      <td>63.462313</td>
-      <td>1048798.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>9179.093811</td>
+      <td>0x5cE9e731311a6b9A9BF26efB5Ff425750FEAcC13</td>
+      <td>323.529412</td>
+      <td>4483.520658</td>
+      <td>4807.050069</td>
+      <td>1.439440e+06</td>
+      <td>4807.050069</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0x0181a709e165195bd67651bb5304b4cab6e0ada2</td>
-      <td>291.005291</td>
-      <td>5889.826587</td>
-      <td>6180.831878</td>
-      <td>700000.0</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>6180.831878</td>
+      <td>0x672E1AcF64DE8836341ba7c2d7d0007ed854037F</td>
+      <td>323.529412</td>
+      <td>3729.937994</td>
+      <td>4053.467406</td>
+      <td>1.197502e+06</td>
+      <td>4053.467406</td>
     </tr>
     <tr>
       <th>...</th>
@@ -14457,79 +14538,55 @@ Final rewards
       <td>...</td>
       <td>...</td>
       <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
     </tr>
     <tr>
-      <th>15461</th>
-      <td>0x152514b1a7ce5c4322133bbb7bee27127e82d722</td>
+      <th>17219</th>
+      <td>0x246da00512a6d7e1bd390368744f625ad99d49bf</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>49.789658</td>
-      <td>1000.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>49.789658</td>
+      <td>0.000000e+00</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>15462</th>
-      <td>0xce248ae79a4b1f9a7a8254e372f26b30d0cc186c</td>
+      <th>17220</th>
+      <td>0x89b2c02b389323abd16264b20886e5e9fd01360e</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>49.789658</td>
-      <td>1000.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>49.789658</td>
+      <td>0.000000e+00</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>15463</th>
-      <td>0x177c4169bfdc42634ef91966ae0a5ec3efe412ba</td>
+      <th>17221</th>
+      <td>0x85f02d85e915aac36700d81b8a22c37dd63d68f4</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>49.789658</td>
-      <td>1000.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>49.789658</td>
+      <td>0.000000e+00</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>15464</th>
-      <td>0x568d6af0b71cc3d0c5154189051c2a3f6bf018f3</td>
+      <th>17222</th>
+      <td>0x0eeb67114a2e73d0056809756afaf19b26b6f24a</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>49.789658</td>
-      <td>1000.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>49.789658</td>
+      <td>0.000000e+00</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>15465</th>
-      <td>0xfcb0543c2a369ec95cbedb23a4706421ca5d3b0f</td>
+      <th>17223</th>
+      <td>0xe28bc5346cb8e7ee8a3b23e1170d50c9a4c7d154</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>49.789658</td>
-      <td>1000.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>49.789658</td>
+      <td>0.000000e+00</td>
+      <td>0.000000</td>
     </tr>
   </tbody>
 </table>
-<p>15466 rows × 10 columns</p>
+<p>17224 rows × 6 columns</p>
 </div>
 </div>
 
